@@ -20,7 +20,6 @@
 
         body {
             background-color: var(--terminal-bg);
-            /* Utilizzo del banner locale su GitHub Pages */
             background: linear-gradient(rgba(5, 7, 10, 0.92), rgba(5, 7, 10, 0.92)), url('./banner.png') no-repeat center center fixed;
             background-size: cover;
             color: #ffffff;
@@ -37,44 +36,48 @@
         .notice { background: rgba(13, 17, 23, 0.95); border-left: 4px solid var(--police-blue); color: white; padding: 15px 25px; font-family: 'Orbitron'; font-size: 0.8rem; min-width: 250px; box-shadow: 0 0 15px rgba(0,0,0,0.5); backdrop-filter: blur(5px); animation: slideIn 0.3s ease forwards; }
         
         #modalOverlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
-        .modal-content { background: #0d1117; border: 1px solid var(--police-blue); width: 90%; max-width: 450px; padding: 30px; box-shadow: 0 0 40px var(--neon-glow); text-align: center; }
+        .modal-content { background: #0d1117; border: 1px solid var(--police-blue); width: 95%; max-width: 650px; padding: 30px; box-shadow: 0 0 40px var(--neon-glow); max-height: 90vh; overflow-y: auto; position: relative; }
 
         /* --- LAYOUT --- */
         .police-logo { width: 120px; margin-top: 20px; filter: drop-shadow(0 0 10px var(--neon-glow)); }
-        .container { width: 95%; max-width: 1100px; background: rgba(13, 17, 23, 0.95); border: 1px solid var(--border-blue); padding: 30px; margin: 20px 0 100px 0; backdrop-filter: blur(10px); box-shadow: 0 0 20px var(--neon-glow); position: relative; }
-        .auth-container { max-width: 400px; margin-top: 50px; text-align: center; border: 1px solid var(--police-blue); }
+        .container { width: 95%; max-width: 1100px; background: rgba(13, 17, 23, 0.95); border: 1px solid var(--border-blue); padding: 30px; margin: 20px 0 20px 0; backdrop-filter: blur(10px); box-shadow: 0 0 20px var(--neon-glow); position: relative; }
+        .auth-container { max-width: 400px; margin-top: 50px; text-align: center; }
         .classified-tag { position: absolute; top: 15px; right: 15px; border: 1px solid var(--police-accent); color: var(--police-accent); padding: 2px 10px; font-family: 'Orbitron'; font-size: 0.6rem; text-transform: uppercase; }
 
-        h1 { font-family: 'Orbitron'; text-align: center; letter-spacing: 2px; color: #fff; border-bottom: 2px solid var(--police-blue); padding-bottom: 10px; }
+        h1, h2 { font-family: 'Orbitron'; text-align: center; letter-spacing: 2px; border-bottom: 2px solid var(--police-blue); padding-bottom: 10px; }
         
-        /* --- AZIONI RAPIDE --- */
         .action-bar { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
         .search-bar { flex-grow: 1; background: rgba(255,255,255,0.05); border: 1px solid var(--police-blue); padding: 12px; color: white; font-family: 'Orbitron'; font-size: 0.8rem; }
 
         .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 20px; background: rgba(255,255,255,0.03); padding: 20px; border: 1px dashed rgba(0,85,255,0.3); }
         .form-group { display: flex; flex-direction: column; text-align: left; }
         label { color: var(--police-accent); font-size: 0.7rem; font-family: 'Orbitron'; margin-bottom: 5px; }
-        input, select { background: #000; border: 1px solid var(--police-blue); color: #fff; padding: 10px; font-family: 'Barlow Condensed'; font-size: 1rem; }
+        input, select, textarea { background: #000; border: 1px solid var(--police-blue); color: #fff; padding: 10px; font-family: 'Barlow Condensed'; font-size: 1rem; }
         
-        button { background: var(--police-dark); color: white; border: 1px solid var(--police-blue); padding: 12px 20px; font-family: 'Orbitron'; cursor: pointer; transition: 0.3s; text-transform: uppercase; font-size: 0.8rem; }
+        button { background: var(--police-dark); color: white; border: 1px solid var(--police-blue); padding: 12px 20px; font-family: 'Orbitron'; cursor: pointer; transition: 0.3s; text-transform: uppercase; font-size: 0.7rem; }
         button:hover { background: var(--police-blue); box-shadow: 0 0 15px var(--police-blue); }
-        .btn-export { border-color: var(--police-accent); color: var(--police-accent); }
-        .btn-danger { border-color: var(--danger); color: var(--danger); background: transparent; }
+        .btn-danger { border-color: var(--danger); color: var(--danger); }
         .btn-danger:hover { background: var(--danger); color: white; }
 
         /* --- TABLE --- */
-        .table-container { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; text-align: left; }
-        th { font-family: 'Orbitron'; font-size: 0.7rem; color: var(--police-accent); border-bottom: 2px solid var(--police-blue); padding: 12px; }
-        td { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 1rem; }
-        
-        .status-badge { padding: 2px 8px; border-radius: 3px; font-family: 'Orbitron'; font-size: 0.6rem; font-weight: bold; }
+        table { width: 100%; border-collapse: collapse; }
+        th { font-family: 'Orbitron'; font-size: 0.7rem; color: var(--police-accent); border-bottom: 2px solid var(--police-blue); padding: 12px; text-align: left; }
+        td { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .clickable-name { color: var(--police-blue); cursor: pointer; font-weight: bold; text-decoration: underline; }
+
+        .status-badge { padding: 2px 8px; border-radius: 3px; font-family: 'Orbitron'; font-size: 0.6rem; }
         .status-servizio { background: rgba(0, 255, 136, 0.2); color: var(--success); border: 1px solid var(--success); }
         .status-licenziato { background: rgba(255, 68, 68, 0.2); color: var(--danger); border: 1px solid var(--danger); }
 
+        /* --- DOSSIER SPECIFIC --- */
+        .dossier-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; text-align: left; margin-top: 20px; }
+        .dossier-section { border: 1px solid rgba(0,85,255,0.2); padding: 15px; background: rgba(255,255,255,0.02); }
+        .tag-container { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 5px; }
+        .tag { font-size: 0.6rem; padding: 2px 6px; background: var(--police-blue); border-radius: 3px; font-family: 'Orbitron'; }
+
+        .main-footer { margin-top: auto; padding: 20px; text-align: center; width: 100%; background: rgba(0,0,0,0.5); border-top: 1px solid var(--police-blue); }
         .hidden { display: none !important; }
-        #logoutBtn { position: absolute; top: 10px; left: 10px; padding: 5px 10px; font-size: 0.6rem; border-color: var(--danger); color: var(--danger); background: transparent; }
-        
+
         @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
     </style>
 </head>
@@ -89,49 +92,46 @@
 <img src="./logo.png" alt="LSPD Logo" class="police-logo">
 
 <div id="authSection" class="auth-container container">
-    <div class="classified-tag">ARCHIVIO PERSONALE</div>
-    <h1 style="font-size: 1.2rem;">ACCESSO DATABASE AGENTI</h1>
+    <div class="classified-tag">ACCESSO RISERVATO</div>
+    <h1>LOGIN DATABASE</h1>
     <form id="loginForm">
         <div class="form-group" style="margin-bottom: 15px;">
-            <label>Email</label>
-            <input type="email" id="loginEmail" required placeholder="lspd-altocom@fusion.it">
+            <label>Email Operativa</label>
+            <input type="email" id="loginEmail" required placeholder="agente@lspd.it">
         </div>
         <div class="form-group" style="margin-bottom: 20px;">
-            <label>Password</label>
+            <label>Codice Criptato</label>
             <input type="password" id="loginPassword" required placeholder="••••••••">
         </div>
-        <button type="submit" style="width: 100%;">LOGIN</button>
+        <button type="submit" style="width: 100%;">AUTORIZZA ACCESSO</button>
     </form>
 </div>
 
 <div id="mainApp" class="container hidden">
-    <button id="logoutBtn" onclick="logout()">LOGOUT</button>
-    <div class="classified-tag">Registro interno</div>
-    <h1>DATABASE MATRICOLE</h1>
+    <button id="logoutBtn" onclick="logout()" style="position: absolute; top: 10px; left: 10px;">LOGOUT</button>
+    <div class="classified-tag">Protocollo Fusion</div>
+    <h1>RUOLINO AGENTI LSPD</h1>
 
     <div id="adminControls">
-        <h3 style="font-family: 'Orbitron'; color: var(--police-accent); font-size: 0.8rem; margin-top: 30px;">[+] REGISTRAZIONE NUOVA MATRICOLA</h3>
+        <h3 style="font-family: 'Orbitron'; color: var(--police-accent); font-size: 0.8rem;">[+] INSERIMENTO NUOVO DOSSIER</h3>
         <form id="matricolaForm" class="form-grid">
             <div class="form-group">
                 <label>Nome e Cognome</label>
                 <input type="text" id="nomeAgente" required>
             </div>
             <div class="form-group">
+                <label>Matricola</label>
+                <input type="text" id="numMatricola" required>
+            </div>
+            <div class="form-group">
                 <label>Grado</label>
                 <select id="gradoAgente">
                     <option value="Capo Polizia">Capo Polizia</option>
-                    <option value="Assistente Capo">Assistente Capo</option>
-                    <option value="Vice Capo">Vice Capo</option>
                     <option value="Comandante">Comandante</option>
-                    <option value="Capitano II">Capitano II</option>
-                    <option value="Capitano I">Capitano I</option>
-                    <option value="Tenente II">Tenente II</option>
-                    <option value="Tenente I">Tenente I</option>
-                    <option value="Detective III">Detective III</option>
-                    <option value="Sergente II">Sergente II</option>
-                    <option value="Detective II">Detective II</option>
-                    <option value="Sergente I">Sergente I</option>
-                    <option value="Detective I">Detective I</option>
+                    <option value="Capitano">Capitano</option>
+                    <option value="Tenente">Tenente</option>
+                    <option value="Sergente">Sergente</option>
+                    <option value="Detective">Detective</option>
                     <option value="Agente III">Agente III</option>
                     <option value="Agente II">Agente II</option>
                     <option value="Agente I">Agente I</option>
@@ -139,38 +139,31 @@
                 </select>
             </div>
             <div class="form-group">
-                <label>Matricola</label>
-                <input type="text" id="numMatricola" placeholder="es. 01" required>
-            </div>
-            <div class="form-group">
                 <label>Data Assunzione</label>
                 <input type="date" id="dataAssunzione" required>
             </div>
-            <div class="form-group">
-                <label>Responsabile</label>
-                <input type="text" id="responsabile" required>
+            <div class="form-group" style="grid-column: span 2;">
+                <label>Note Disciplinari / Armi Registrate</label>
+                <textarea id="noteAgente" rows="2" placeholder="Es: Glock-17 Mat. 9982 | Comportamento esemplare..."></textarea>
             </div>
-            <div class="form-group" style="justify-content: flex-end;">
-                <button type="submit" id="btnSalva">REGISTRA</button>
+            <div class="form-group" style="justify-content: flex-end; grid-column: -1;">
+                <button type="submit" id="btnSalva">ARCHIVIA</button>
             </div>
         </form>
     </div>
 
-    <hr style="border: 0; border-top: 1px solid rgba(0,85,255,0.3); margin: 30px 0;">
-
     <div class="action-bar">
-        <input type="text" class="search-bar" id="searchInput" placeholder="FILTRA DATABASE (NOME O MATRICOLA)..." onkeyup="filtraTabella()">
-        <button class="btn-export" onclick="esportaReport()">Esporta Report</button>
+        <input type="text" class="search-bar" id="searchInput" placeholder="CERCA AGENTE O MATRICOLA..." onkeyup="filtraTabella()">
+        <button onclick="esportaReport()">Report TXT</button>
     </div>
 
-    <div class="table-container">
+    <div style="overflow-x: auto;">
         <table>
             <thead>
                 <tr>
                     <th>MAT.</th>
                     <th>AGENTE</th>
                     <th>GRADO</th>
-                    <th>ASSUNZIONE</th>
                     <th>STATO</th>
                     <th>AZIONI</th>
                 </tr>
@@ -180,12 +173,17 @@
     </div>
 </div>
 
+<footer class="main-footer">
+    <div class="footer-text" style="color: rgba(255,255,255,0.7); font-family: 'Orbitron'; font-size: 0.7rem;">
+        © 2026 <span style="color: var(--police-accent);">LOS SANTOS POLICE DEPARTMENT</span> — PROTOCOLLO FUSION ETERNAL
+    </div>
+</footer>
+
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
 <script>
-    const ADMIN_EMAIL = "lspd-altocom@fusion.it";
     const firebaseConfig = {
         apiKey: "AIzaSyDfIW4GjBZ4QGPvfJtzLAr34VxDRLzcU6M",
         authDomain: "lspd-portal-d34b0.firebaseapp.com",
@@ -199,10 +197,8 @@
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    let agentiLocali = []; // Per export rapido
-
     auth.onAuthStateChanged(user => {
-        if (user && user.email === ADMIN_EMAIL) {
+        if (user && user.email === "lspd-altocom@fusion.it") {
             document.getElementById('authSection').classList.add('hidden');
             document.getElementById('mainApp').classList.remove('hidden');
             caricaRuolino();
@@ -215,116 +211,112 @@
     document.getElementById('loginForm').addEventListener('submit', e => {
         e.preventDefault();
         auth.signInWithEmailAndPassword(document.getElementById('loginEmail').value, document.getElementById('loginPassword').value)
-            .catch(() => showNotice("Accesso Negato: Protocollo Fallito", "error"));
+            .catch(() => showNotice("ERRORE: Credenziali non autorizzate", "error"));
     });
 
     function logout() { auth.signOut().then(() => window.location.reload()); }
 
     async function caricaRuolino() {
-        const snapshot = await db.collection("ruolino_agenti").orderBy("dataAssunzione", "desc").get();
+        const snapshot = await db.collection("ruolino_agenti").orderBy("numMatricola", "asc").get();
         const tbody = document.getElementById('ruolinoCorpo');
         tbody.innerHTML = "";
-        agentiLocali = [];
-
         snapshot.forEach(doc => {
             const data = doc.data();
-            agentiLocali.push(data);
             const row = document.createElement('tr');
-            const statusClass = data.stato === 'IN SERVIZIO' ? 'status-servizio' : 'status-licenziato';
-            
             row.innerHTML = `
-                <td style="color:var(--police-accent); font-weight:bold;">#${data.numMatricola}</td>
-                <td>${data.nomeAgente}</td>
+                <td style="color:var(--police-accent);">#${data.numMatricola}</td>
+                <td class="clickable-name" onclick="apriDossier('${doc.id}')">${data.nomeAgente}</td>
                 <td>${data.grado}</td>
-                <td style="font-size:0.8rem;">${formattaData(data.dataAssunzione)}</td>
-                <td><span class="status-badge ${statusClass}">${data.stato}</span></td>
+                <td><span class="status-badge ${data.stato === 'IN SERVIZIO' ? 'status-servizio' : 'status-licenziato'}">${data.stato}</span></td>
                 <td>
-                    <button onclick="toggleStato('${doc.id}', '${data.stato}')" style="padding:4px 8px; font-size:0.6rem;">STATO</button>
-                    <button onclick="chiediConfermaEliminazione('${doc.id}', '${data.nomeAgente}')" class="btn-danger" style="padding:4px 8px; font-size:0.6rem;">ELIMINA</button>
+                    <button onclick="toggleStato('${doc.id}', '${data.stato}')" style="padding:5px;">⚡</button>
+                    <button onclick="eliminaAgente('${doc.id}')" class="btn-danger" style="padding:5px;">X</button>
                 </td>
             `;
             tbody.appendChild(row);
         });
     }
 
-    function filtraTabella() {
-        const input = document.getElementById("searchInput").value.toUpperCase();
-        const rows = document.getElementById("ruolinoCorpo").getElementsByTagName("tr");
-        for (let i = 0; i < rows.length; i++) {
-            const txt = rows[i].textContent.toUpperCase();
-            rows[i].style.display = txt.includes(input) ? "" : "none";
-        }
-    }
-
-    async function esportaReport() {
-        let content = "LSPD - REPORT PERSONALE OPERATIVO\n";
-        content += "Generato il: " + new Date().toLocaleString() + "\n";
-        content += "-------------------------------------------\n\n";
-        
-        agentiLocali.forEach(a => {
-            content += `[MAT. ${a.numMatricola}] ${a.nomeAgente} - Grado: ${a.grado} - Stato: ${a.stato} - Assunto: ${a.dataAssunzione}\n`;
-        });
-
-        const blob = new Blob([content], { type: 'text/plain' });
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `Report_LSPD_${new Date().toISOString().split('T')[0]}.txt`;
-        a.click();
-    }
-
-    document.getElementById('matricolaForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const btn = document.getElementById('btnSalva');
-        btn.disabled = true;
-
-        const nuovoAgente = {
-            nomeAgente: document.getElementById('nomeAgente').value,
-            grado: document.getElementById('gradoAgente').value,
-            numMatricola: document.getElementById('numMatricola').value,
-            dataAssunzione: document.getElementById('dataAssunzione').value,
-            responsabile: document.getElementById('responsabile').value,
-            stato: 'IN SERVIZIO'
-        };
-
-        try {
-            await db.collection("ruolino_agenti").add(nuovoAgente);
-            showNotice("Agente registrato nel Database", "success");
-            document.getElementById('matricolaForm').reset();
-            caricaRuolino();
-        } catch (err) { showNotice("Errore Database Centrale", "error"); }
-        btn.disabled = false;
-    });
-
-    async function toggleStato(id, statoAttuale) {
-        const nuovoStato = statoAttuale === 'IN SERVIZIO' ? 'LICENZIATO' : 'IN SERVIZIO';
-        await db.collection("ruolino_agenti").doc(id).update({ stato: nuovoStato });
-        caricaRuolino();
-    }
-
-    function chiediConfermaEliminazione(id, nome) {
+    async function apriDossier(id) {
+        const doc = await db.collection("ruolino_agenti").doc(id).get();
+        const data = doc.data();
         const modal = document.getElementById('modalOverlay');
         const body = document.getElementById('modalBody');
+
         body.innerHTML = `
-            <h2 style="font-family:'Orbitron'; color:var(--danger);">ATTENZIONE</h2>
-            <p>Confermi l'epurazione definitiva dell'agente <strong>${nome}</strong>?</p>
-            <div style="display:flex; gap:10px; margin-top:25px; justify-content:center;">
-                <button onclick="chiudiModale()" style="background:#333; border:none;">ANNULLA</button>
-                <button onclick="confermaElimina('${id}')" class="btn-danger" style="border:none;">ELIMINA</button>
+            <button onclick="chiudiModale()" style="position:absolute; right:10px; top:10px;">CHIUDI</button>
+            <h2 style="color:var(--police-accent);">DOSSIER AGENTE: ${data.nomeAgente}</h2>
+            <div class="dossier-grid">
+                <div class="dossier-section">
+                    <label>STATO DI SERVIZIO</label>
+                    <p>${data.stato}</p>
+                    <label>RICHIAMI DISCIPLINARI (1-3)</label>
+                    <p style="color:var(--danger); font-weight:bold;">${data.richiami || '0'} / 3</p>
+                </div>
+                <div class="dossier-section">
+                    <label>DATA ASSUNZIONE</label>
+                    <p>${data.dataAssunzione}</p>
+                    <label>RESPONSABILE</label>
+                    <p>${data.responsabile || 'N/D'}</p>
+                </div>
+                <div class="dossier-section" style="grid-column: span 2;">
+                    <label>NOTE E ARMI REGISTRATE</label>
+                    <p style="font-size:0.9rem; white-space: pre-wrap;">${data.noteAgente || 'Nessuna nota presente.'}</p>
+                </div>
+            </div>
+            <div style="margin-top:20px; text-align:left;">
+                <label>MODIFICA RICHIAMI:</label>
+                <input type="number" id="editRichiami" value="${data.richiami || 0}" min="0" max="3" style="width:50px;">
+                <button onclick="aggiornaRichiami('${id}')">SALVA</button>
             </div>
         `;
         modal.style.display = 'flex';
     }
 
-    async function confermaElimina(id) {
-        await db.collection("ruolino_agenti").doc(id).delete();
+    async function aggiornaRichiami(id) {
+        const val = document.getElementById('editRichiami').value;
+        await db.collection("ruolino_agenti").doc(id).update({ richiami: val });
+        showNotice("Dossier Aggiornato", "success");
         chiudiModale();
-        showNotice("Record archiviato/eliminato", "success");
         caricaRuolino();
     }
 
+    document.getElementById('matricolaForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const nuovo = {
+            nomeAgente: document.getElementById('nomeAgente').value,
+            numMatricola: document.getElementById('numMatricola').value,
+            grado: document.getElementById('gradoAgente').value,
+            dataAssunzione: document.getElementById('dataAssunzione').value,
+            noteAgente: document.getElementById('noteAgente').value,
+            stato: 'IN SERVIZIO',
+            richiami: 0
+        };
+        await db.collection("ruolino_agenti").add(nuovo);
+        document.getElementById('matricolaForm').reset();
+        caricaRuolino();
+        showNotice("Agente Archiviato", "success");
+    });
+
+    async function toggleStato(id, stato) {
+        const nuovo = stato === 'IN SERVIZIO' ? 'LICENZIATO' : 'IN SERVIZIO';
+        await db.collection("ruolino_agenti").doc(id).update({ stato: nuovo });
+        caricaRuolino();
+    }
+
+    async function eliminaAgente(id) {
+        if(confirm("Eliminare definitivamente il dossier?")) {
+            await db.collection("ruolino_agenti").doc(id).delete();
+            caricaRuolino();
+        }
+    }
+
     function chiudiModale() { document.getElementById('modalOverlay').style.display = 'none'; }
-    function formattaData(dataStr) { return new Date(dataStr).toLocaleDateString('it-IT'); }
+    function filtraTabella() {
+        const val = document.getElementById('searchInput').value.toUpperCase();
+        const rows = document.querySelectorAll('#ruolinoCorpo tr');
+        rows.forEach(r => r.style.display = r.innerText.toUpperCase().includes(val) ? '' : 'none');
+    }
 
     function showNotice(msg, type) {
         const container = document.getElementById('notification-container');
@@ -332,10 +324,7 @@
         n.className = `notice ${type}`;
         n.innerText = msg;
         container.appendChild(n);
-        setTimeout(() => {
-            n.style.opacity = '0';
-            setTimeout(() => n.remove(), 500);
-        }, 4000);
+        setTimeout(() => n.remove(), 4000);
     }
 </script>
 </body>
