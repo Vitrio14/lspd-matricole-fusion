@@ -189,6 +189,9 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
 <script>
+    // --- CONFIGURAZIONE E COSTANTI ---
+    const TARGET_AUTH_EMAIL = "lspd-altocom@fusion.it";
+
     const firebaseConfig = {
         apiKey: "AIzaSyDfIW4GjBZ4QGPvfJtzLAr34VxDRLzcU6M",
         authDomain: "lspd-portal-d34b0.firebaseapp.com",
@@ -197,6 +200,7 @@
         messagingSenderId: "991237515788",
         appId: "1:991237515788:web:302c1b6819947116199c29"
     };
+
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
@@ -204,86 +208,90 @@
     const ABILITAZIONI_LIST = ["Detective Bureau", "SWAT", "T.E.D.", "K-9", "Marine Unit", "C.R.A.S.H", "Air Unit"];
     const INCARICHI_LIST = ["Istruttore Reclute", "Reclutatore", "Coordinatore", "Resp. Divisione"];
 
+    // --- LOGICA DI AUTORIZZAZIONE ---
     auth.onAuthStateChanged(user => {
-        if (user && user.email === "lspd-altocom@fusion.it") {
-            document.getElementById('authSection').classList.add('hidden');
-            document.getElementById('mainApp').classList.remove('hidden');
-            caricaRuolino();
+        const authSection = document.getElementById('authSection');
+        const mainApp = document.getElementById('mainApp');
+
+        if (user) {
+            // Controllo di sicurezza: se l'email non è quella dell'Alto Comando, forzo il logout
+            if (user.email.toLowerCase() === TARGET_AUTH_EMAIL.toLowerCase()) {
+                authSection.classList.add('hidden');
+                mainApp.classList.remove('hidden');
+                caricaRuolino();
+            } else {
+                showNotice("ACCESSO NEGATO: Personale non autorizzato", "error");
+                auth.signOut();
+            }
         } else {
-            document.getElementById('authSection').classList.remove('hidden');
-            document.getElementById('mainApp').classList.add('hidden');
+            authSection.classList.remove('hidden');
+            mainApp.classList.add('hidden');
+            document.getElementById('ruolinoCorpo').innerHTML = ""; // Pulisce i dati sensibili
         }
     });
 
+    // --- LOGIN ---
     document.getElementById('loginForm').addEventListener('submit', e => {
         e.preventDefault();
-        auth.signInWithEmailAndPassword(document.getElementById('loginEmail').value, document.getElementById('loginPassword').value)
-            .then(() => showNotice("Accesso Autorizzato", "success"))
-            .catch(err => showNotice("Credenziali Errate", "error"));
+        const email = document.getElementById('loginEmail').value.trim();
+        const pass = document.getElementById('loginPassword').value;
+
+        // Verifica preventiva lato client
+        if (email.toLowerCase() !== TARGET_AUTH_EMAIL.toLowerCase()) {
+            showNotice("ERRORE: Credenziali non valide per l'Alto Comando", "error");
+            return;
+        }
+
+        auth.signInWithEmailAndPassword(email, pass)
+            .then(() => showNotice("Identità Verificata", "success"))
+            .catch(err => showNotice("Chiave di Accesso Errata", "error"));
     });
 
-    function logout() { auth.signOut().then(() => window.location.reload()); }
+    function logout() { 
+        auth.signOut().then(() => {
+            showNotice("Sessione Chiusa", "success");
+            setTimeout(() => window.location.reload(), 1000);
+        }); 
+    }
 
+    // --- GESTIONE DATABASE ---
     async function caricaRuolino() {
-        const snap = await db.collection("ruolino_agenti").orderBy("numMatricola", "asc").get();
-        const tbody = document.getElementById('ruolinoCorpo');
-        tbody.innerHTML = "";
-        
-        let stats = { totale: 0, attivi: 0, sospesi: 0, licenziati: 0 };
-
-        snap.forEach(doc => {
-            const d = doc.data();
-            stats.totale++;
-            if(d.stato === 'IN SERVIZIO') stats.attivi++;
-            else if(d.stato === 'SOSPESO') stats.sospesi++;
-            else if(d.stato === 'LICENZIATO') stats.licenziati++;
-
-            const row = document.createElement('tr');
-            let sClass = d.stato === 'IN SERVIZIO' ? 'status-servizio' : (d.stato === 'SOSPESO' ? 'status-sospeso' : 'status-licenziato');
-            row.innerHTML = `
-                <td style="color:var(--police-accent); font-weight:bold;">#${d.numMatricola}</td>
-                <td class="clickable" onclick="apriDossier('${doc.id}')">${d.nomeAgente}</td>
-                <td>${d.grado}</td>
-                <td><span class="status-badge ${sClass}">${d.stato}</span></td>
-                <td><button onclick="chiediConfermaEliminazione('${doc.id}', '${d.nomeAgente.replace(/'/g, "\\'")}')" class="btn-danger" style="padding:5px 10px;">ELIMINA</button></td>
-            `;
-            tbody.appendChild(row);
-        });
-
-        // Aggiorna Dashboard
-        document.getElementById('count-totale').innerText = stats.totale;
-        document.getElementById('count-attivi').innerText = stats.attivi;
-        document.getElementById('count-sospesi').innerText = stats.sospesi;
-        document.getElementById('count-licenziati').innerText = stats.licenziati;
-    }
-
-    function chiediConfermaEliminazione(id, nome) {
-        const modal = document.getElementById('modalOverlay');
-        const body = document.getElementById('modalBody');
-        body.className = "modal-content confirm-box";
-        body.innerHTML = `
-            <h2 style="font-family:'Orbitron'; color:var(--danger); margin-bottom:10px;">[!] ATTENZIONE CRITICA</h2>
-            <p style="font-size:1.1rem; letter-spacing:1px; margin-bottom:25px;">
-                CONFERMARE L'ELIMINAZIONE DEFINITIVA DEL DOSSIER:<br>
-                <span style="color:var(--police-accent); font-weight:bold;">${nome.toUpperCase()}</span>
-            </p>
-            <div style="display:flex; gap:15px; justify-content:center;">
-                <button onclick="eseguiEliminazione('${id}')" class="btn-danger" style="flex:1;">ELIMINA ORA</button>
-                <button onclick="chiudiModale()" style="flex:1; background:#333;">ANNULLA</button>
-            </div>
-        `;
-        modal.style.display = 'flex';
-    }
-
-    async function eseguiEliminazione(id) {
         try {
-            await db.collection("ruolino_agenti").doc(id).delete();
-            showNotice("Record Eliminato Definitivamente", "error");
-            chiudiModale();
-            caricaRuolino();
-        } catch (err) { showNotice("Errore durante l'eliminazione", "error"); }
+            const snap = await db.collection("ruolino_agenti").orderBy("numMatricola", "asc").get();
+            const tbody = document.getElementById('ruolinoCorpo');
+            tbody.innerHTML = "";
+            
+            let stats = { totale: 0, attivi: 0, sospesi: 0, licenziati: 0 };
+
+            snap.forEach(doc => {
+                const d = doc.data();
+                stats.totale++;
+                if(d.stato === 'IN SERVIZIO') stats.attivi++;
+                else if(d.stato === 'SOSPESO') stats.sospesi++;
+                else if(d.stato === 'LICENZIATO') stats.licenziati++;
+
+                const row = document.createElement('tr');
+                let sClass = d.stato === 'IN SERVIZIO' ? 'status-servizio' : (d.stato === 'SOSPESO' ? 'status-sospeso' : 'status-licenziato');
+                row.innerHTML = `
+                    <td style="color:var(--police-accent); font-weight:bold;">#${d.numMatricola}</td>
+                    <td class="clickable" onclick="apriDossier('${doc.id}')">${d.nomeAgente}</td>
+                    <td>${d.grado}</td>
+                    <td><span class="status-badge ${sClass}">${d.stato}</span></td>
+                    <td><button onclick="chiediConfermaEliminazione('${doc.id}', '${d.nomeAgente.replace(/'/g, "\\'")}')" class="btn-danger" style="padding:5px 10px;">ELIMINA</button></td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            document.getElementById('count-totale').innerText = stats.totale;
+            document.getElementById('count-attivi').innerText = stats.attivi;
+            document.getElementById('count-sospesi').innerText = stats.sospesi;
+            document.getElementById('count-licenziati').innerText = stats.licenziati;
+        } catch (err) {
+            showNotice("Errore Critico Database", "error");
+        }
     }
 
+    // --- FUNZIONI OPERATIVE ---
     document.getElementById('matricolaForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const nuovo = {
@@ -296,10 +304,10 @@
         };
         try {
             await db.collection("ruolino_agenti").add(nuovo);
-            showNotice("Dossier creato con successo", "success");
+            showNotice("Dossier Archiviato", "success");
             document.getElementById('matricolaForm').reset();
             caricaRuolino();
-        } catch (err) { showNotice("Errore Database", "error"); }
+        } catch (err) { showNotice("Errore Scrittura", "error"); }
     });
 
     async function apriDossier(id) {
@@ -321,51 +329,38 @@
                         <option value="SOSPESO" ${d.stato === 'SOSPESO' ? 'selected' : ''}>SOSPESO</option>
                         <option value="LICENZIATO" ${d.stato === 'LICENZIATO' ? 'selected' : ''}>LICENZIATO</option>
                     </select>
-                    <label style="margin-top:15px; display:block;">RICHIAMI DISCIPLINARI (MAX 3)</label>
+                    <label style="margin-top:15px; display:block;">RICHIAMI DISCIPLINARI</label>
                     <input type="number" id="editRichiami" value="${d.richiami}" min="0" max="3" style="width:100%;">
-                    <label style="margin-top:15px; display:block;">DATA ASSUNZIONE</label>
-                    <p style="margin:5px 0; font-size:1.1rem; color:#fff;">${d.dataAssunzione}</p>
-                    <label style="margin-top:10px; display:block;">RECLUTATORE</label>
-                    <p style="margin:5px 0; font-size:1.1rem; color:var(--police-blue);">${d.responsabile}</p>
                 </div>
                 <div>
-                    <label>ARMI REGISTRATE NEL SISTEMA</label>
-                    <textarea id="editArmi" style="width:100%; height:140px; border-color:var(--warning);">${d.armi || ''}</textarea>
+                    <label>ARMI REGISTRATE</label>
+                    <textarea id="editArmi" style="width:100%; height:100px;">${d.armi || ''}</textarea>
                 </div>
             </div>
-            <div style="margin-top:25px; text-align:left;">
-                <label>ABILITAZIONI DIVISIONALI</label>
+            <div style="margin-top:20px; text-align:left;">
+                <label>ABILITAZIONI / INCARICHI</label>
                 <div class="checkbox-group">
                     ${ABILITAZIONI_LIST.map(a => `<label class="checkbox-item"><input type="checkbox" name="abs" value="${a}" ${(d.abilitazioni || []).includes(a) ? 'checked' : ''}> ${a}</label>`).join('')}
                 </div>
             </div>
             <div style="margin-top:20px; text-align:left;">
-                <label>INCARICHI E MANSIONI</label>
-                <div class="checkbox-group">
-                    ${INCARICHI_LIST.map(i => `<label class="checkbox-item"><input type="checkbox" name="inc" value="${i}" ${(d.incarichi || []).includes(i) ? 'checked' : ''}> ${i}</label>`).join('')}
-                </div>
+                <label>NOTE DISCIPLINARI</label>
+                <textarea id="editNote" style="width:100%; height:80px;">${d.note || ''}</textarea>
             </div>
-            <div style="margin-top:25px; text-align:left;">
-                <label>STORICO NOTE DISCIPLINARI</label>
-                <textarea id="editNote" style="width:100%; height:120px;">${d.note || ''}</textarea>
-            </div>
-            <div style="margin-top:30px;">
-                <button onclick="salvaDossier('${id}')" style="width:100%; padding:15px; background:var(--police-blue); font-weight:bold;">AGGIORNA DATABASE CENTRALE</button>
-            </div>
+            <button onclick="salvaDossier('${id}')" style="width:100%; margin-top:20px; padding:15px; background:var(--police-blue);">SALVA MODIFICHE</button>
         `;
         modal.style.display = 'flex';
     }
 
     async function salvaDossier(id) {
         const abs = Array.from(document.querySelectorAll('input[name="abs"]:checked')).map(c => c.value);
-        const inc = Array.from(document.querySelectorAll('input[name="inc"]:checked')).map(c => c.value);
         try {
             await db.collection("ruolino_agenti").doc(id).update({
                 stato: document.getElementById('editStato').value,
                 richiami: parseInt(document.getElementById('editRichiami').value),
                 armi: document.getElementById('editArmi').value,
                 note: document.getElementById('editNote').value,
-                abilitazioni: abs, incarichi: inc
+                abilitazioni: abs
             });
             showNotice("Dossier Aggiornato", "success");
             chiudiModale();
@@ -373,8 +368,28 @@
         } catch (err) { showNotice("Errore Aggiornamento", "error"); }
     }
 
+    function chiediConfermaEliminazione(id, nome) {
+        const modal = document.getElementById('modalOverlay');
+        const body = document.getElementById('modalBody');
+        body.className = "modal-content confirm-box";
+        body.innerHTML = `
+            <h2 style="color:var(--danger);">ELIMINAZIONE CRITICA</h2>
+            <p>Confermi di voler cancellare definitivamente l'agente <b>${nome}</b>?</p>
+            <button onclick="eseguiEliminazione('${id}')" class="btn-danger">ELIMINA</button>
+            <button onclick="chiudiModale()">ANNULLA</button>
+        `;
+        modal.style.display = 'flex';
+    }
+
+    async function eseguiEliminazione(id) {
+        await db.collection("ruolino_agenti").doc(id).delete();
+        showNotice("Dossier Eliminato", "error");
+        chiudiModale();
+        caricaRuolino();
+    }
+
     function chiudiModale() { document.getElementById('modalOverlay').style.display = 'none'; }
-    
+
     function filtraTabella() {
         const v = document.getElementById('searchInput').value.toUpperCase();
         document.querySelectorAll('#ruolinoCorpo tr').forEach(r => {
@@ -385,12 +400,12 @@
     function showNotice(msg, type) {
         const container = document.getElementById('notification-container');
         const n = document.createElement('div');
-        const prefix = type === 'success' ? '[ACCESSO CONSENTITO]' : '[AVVISO DI SISTEMA]';
         n.className = `notice ${type}`;
-        n.innerHTML = `<div style="font-size: 0.6rem; opacity: 0.7; margin-bottom: 4px;">${prefix}</div><div style="font-weight: bold;">${msg}</div>`;
+        n.innerHTML = `<div>${msg}</div>`;
         container.appendChild(n);
         setTimeout(() => { n.classList.add('notice-exit'); setTimeout(() => n.remove(), 300); }, 4000);
     }
 </script>
 </body>
 </html>
+
