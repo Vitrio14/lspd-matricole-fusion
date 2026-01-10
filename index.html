@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LSPD - Gestione Matricole</title>
+    <title>LSPD - Database Operativo</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Barlow+Condensed:wght@400;700&display=swap" rel="stylesheet">
     <style>
@@ -20,7 +20,8 @@
 
         body {
             background-color: var(--terminal-bg);
-            background: linear-gradient(rgba(5, 7, 10, 0.92), rgba(5, 7, 10, 0.92)), url('https://i.imgur.com/G36mN3W.png') no-repeat center center fixed;
+            /* Utilizzo del banner locale su GitHub Pages */
+            background: linear-gradient(rgba(5, 7, 10, 0.92), rgba(5, 7, 10, 0.92)), url('./banner.png') no-repeat center center fixed;
             background-size: cover;
             color: #ffffff;
             font-family: 'Barlow Condensed', sans-serif;
@@ -39,13 +40,17 @@
         .modal-content { background: #0d1117; border: 1px solid var(--police-blue); width: 90%; max-width: 450px; padding: 30px; box-shadow: 0 0 40px var(--neon-glow); text-align: center; }
 
         /* --- LAYOUT --- */
-        .police-logo { width: 100px; margin-top: 20px; filter: drop-shadow(0 0 10px var(--neon-glow)); }
+        .police-logo { width: 120px; margin-top: 20px; filter: drop-shadow(0 0 10px var(--neon-glow)); }
         .container { width: 95%; max-width: 1100px; background: rgba(13, 17, 23, 0.95); border: 1px solid var(--border-blue); padding: 30px; margin: 20px 0 100px 0; backdrop-filter: blur(10px); box-shadow: 0 0 20px var(--neon-glow); position: relative; }
         .auth-container { max-width: 400px; margin-top: 50px; text-align: center; border: 1px solid var(--police-blue); }
         .classified-tag { position: absolute; top: 15px; right: 15px; border: 1px solid var(--police-accent); color: var(--police-accent); padding: 2px 10px; font-family: 'Orbitron'; font-size: 0.6rem; text-transform: uppercase; }
 
         h1 { font-family: 'Orbitron'; text-align: center; letter-spacing: 2px; color: #fff; border-bottom: 2px solid var(--police-blue); padding-bottom: 10px; }
         
+        /* --- AZIONI RAPIDE --- */
+        .action-bar { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        .search-bar { flex-grow: 1; background: rgba(255,255,255,0.05); border: 1px solid var(--police-blue); padding: 12px; color: white; font-family: 'Orbitron'; font-size: 0.8rem; }
+
         .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 20px; background: rgba(255,255,255,0.03); padding: 20px; border: 1px dashed rgba(0,85,255,0.3); }
         .form-group { display: flex; flex-direction: column; text-align: left; }
         label { color: var(--police-accent); font-size: 0.7rem; font-family: 'Orbitron'; margin-bottom: 5px; }
@@ -53,11 +58,12 @@
         
         button { background: var(--police-dark); color: white; border: 1px solid var(--police-blue); padding: 12px 20px; font-family: 'Orbitron'; cursor: pointer; transition: 0.3s; text-transform: uppercase; font-size: 0.8rem; }
         button:hover { background: var(--police-blue); box-shadow: 0 0 15px var(--police-blue); }
+        .btn-export { border-color: var(--police-accent); color: var(--police-accent); }
         .btn-danger { border-color: var(--danger); color: var(--danger); background: transparent; }
         .btn-danger:hover { background: var(--danger); color: white; }
 
         /* --- TABLE --- */
-        .table-container { overflow-x: auto; margin-top: 30px; }
+        .table-container { overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; text-align: left; }
         th { font-family: 'Orbitron'; font-size: 0.7rem; color: var(--police-accent); border-bottom: 2px solid var(--police-blue); padding: 12px; }
         td { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 1rem; }
@@ -80,7 +86,7 @@
     <div class="modal-content" id="modalBody"></div>
 </div>
 
-<img src="https://i.imgur.com/vHqB3qL.png" alt="LSPD Logo" class="police-logo">
+<img src="./logo.png" alt="LSPD Logo" class="police-logo">
 
 <div id="authSection" class="auth-container container">
     <div class="classified-tag">ARCHIVIO PERSONALE</div>
@@ -88,11 +94,11 @@
     <form id="loginForm">
         <div class="form-group" style="margin-bottom: 15px;">
             <label>Email</label>
-            <input type="email" id="loginEmail">
+            <input type="email" id="loginEmail" required placeholder="lspd-altocom@fusion.it">
         </div>
         <div class="form-group" style="margin-bottom: 20px;">
             <label>Password</label>
-            <input type="password" id="loginPassword">
+            <input type="password" id="loginPassword" required placeholder="••••••••">
         </div>
         <button type="submit" style="width: 100%;">LOGIN</button>
     </form>
@@ -150,6 +156,13 @@
         </form>
     </div>
 
+    <hr style="border: 0; border-top: 1px solid rgba(0,85,255,0.3); margin: 30px 0;">
+
+    <div class="action-bar">
+        <input type="text" class="search-bar" id="searchInput" placeholder="FILTRA DATABASE (NOME O MATRICOLA)..." onkeyup="filtraTabella()">
+        <button class="btn-export" onclick="esportaReport()">Esporta Report</button>
+    </div>
+
     <div class="table-container">
         <table>
             <thead>
@@ -186,6 +199,8 @@
     const auth = firebase.auth();
     const db = firebase.firestore();
 
+    let agentiLocali = []; // Per export rapido
+
     auth.onAuthStateChanged(user => {
         if (user && user.email === ADMIN_EMAIL) {
             document.getElementById('authSection').classList.add('hidden');
@@ -200,19 +215,20 @@
     document.getElementById('loginForm').addEventListener('submit', e => {
         e.preventDefault();
         auth.signInWithEmailAndPassword(document.getElementById('loginEmail').value, document.getElementById('loginPassword').value)
-            .catch(() => showNotice("Accesso Negato: Credenziali non autorizzate", "error"));
+            .catch(() => showNotice("Accesso Negato: Protocollo Fallito", "error"));
     });
 
     function logout() { auth.signOut().then(() => window.location.reload()); }
 
     async function caricaRuolino() {
-        // Ordine cronologico per dataAssunzione (più recenti in alto)
         const snapshot = await db.collection("ruolino_agenti").orderBy("dataAssunzione", "desc").get();
         const tbody = document.getElementById('ruolinoCorpo');
         tbody.innerHTML = "";
+        agentiLocali = [];
 
         snapshot.forEach(doc => {
             const data = doc.data();
+            agentiLocali.push(data);
             const row = document.createElement('tr');
             const statusClass = data.stato === 'IN SERVIZIO' ? 'status-servizio' : 'status-licenziato';
             
@@ -231,6 +247,32 @@
         });
     }
 
+    function filtraTabella() {
+        const input = document.getElementById("searchInput").value.toUpperCase();
+        const rows = document.getElementById("ruolinoCorpo").getElementsByTagName("tr");
+        for (let i = 0; i < rows.length; i++) {
+            const txt = rows[i].textContent.toUpperCase();
+            rows[i].style.display = txt.includes(input) ? "" : "none";
+        }
+    }
+
+    async function esportaReport() {
+        let content = "LSPD - REPORT PERSONALE OPERATIVO\n";
+        content += "Generato il: " + new Date().toLocaleString() + "\n";
+        content += "-------------------------------------------\n\n";
+        
+        agentiLocali.forEach(a => {
+            content += `[MAT. ${a.numMatricola}] ${a.nomeAgente} - Grado: ${a.grado} - Stato: ${a.stato} - Assunto: ${a.dataAssunzione}\n`;
+        });
+
+        const blob = new Blob([content], { type: 'text/plain' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Report_LSPD_${new Date().toISOString().split('T')[0]}.txt`;
+        a.click();
+    }
+
     document.getElementById('matricolaForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const btn = document.getElementById('btnSalva');
@@ -247,10 +289,10 @@
 
         try {
             await db.collection("ruolino_agenti").add(nuovoAgente);
-            showNotice("Agente registrato nel sistema", "success");
+            showNotice("Agente registrato nel Database", "success");
             document.getElementById('matricolaForm').reset();
             caricaRuolino();
-        } catch (err) { showNotice("Errore database", "error"); }
+        } catch (err) { showNotice("Errore Database Centrale", "error"); }
         btn.disabled = false;
     });
 
@@ -260,16 +302,15 @@
         caricaRuolino();
     }
 
-    // --- SISTEMA MODALI COERENTI ---
     function chiediConfermaEliminazione(id, nome) {
         const modal = document.getElementById('modalOverlay');
         const body = document.getElementById('modalBody');
         body.innerHTML = `
-            <h2 style="font-family:'Orbitron'; color:var(--danger);">AVVISO ELIMINAZIONE</h2>
-            <p>Sei sicuro di voler eliminare definitivamente l'agente <strong>${nome}</strong> dal database centrale?</p>
+            <h2 style="font-family:'Orbitron'; color:var(--danger);">ATTENZIONE</h2>
+            <p>Confermi l'epurazione definitiva dell'agente <strong>${nome}</strong>?</p>
             <div style="display:flex; gap:10px; margin-top:25px; justify-content:center;">
                 <button onclick="chiudiModale()" style="background:#333; border:none;">ANNULLA</button>
-                <button onclick="confermaElimina('${id}')" class="btn-danger" style="border:none;">ELIMINA DEFINITIVAMENTE</button>
+                <button onclick="confermaElimina('${id}')" class="btn-danger" style="border:none;">ELIMINA</button>
             </div>
         `;
         modal.style.display = 'flex';
@@ -278,16 +319,12 @@
     async function confermaElimina(id) {
         await db.collection("ruolino_agenti").doc(id).delete();
         chiudiModale();
-        showNotice("Record eliminato con successo", "success");
+        showNotice("Record archiviato/eliminato", "success");
         caricaRuolino();
     }
 
     function chiudiModale() { document.getElementById('modalOverlay').style.display = 'none'; }
-
-    function formattaData(dataStr) {
-        const d = new Date(dataStr);
-        return d.toLocaleDateString('it-IT');
-    }
+    function formattaData(dataStr) { return new Date(dataStr).toLocaleDateString('it-IT'); }
 
     function showNotice(msg, type) {
         const container = document.getElementById('notification-container');
