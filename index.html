@@ -28,6 +28,9 @@
         #modalOverlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 9999; justify-content: center; align-items: center; backdrop-filter: blur(10px); }
         .modal-content { background: #0d1117; border: 1px solid var(--police-blue); width: 95%; max-width: 850px; padding: 30px; max-height: 90vh; overflow-y: auto; box-shadow: 0 0 50px rgba(0,85,255,0.3); }
 
+        /* Stile specifico per conferma eliminazione */
+        .confirm-box { text-align: center; border: 2px solid var(--danger) !important; max-width: 400px !important; }
+
         .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; background: rgba(255,255,255,0.03); padding: 20px; border: 1px dashed var(--police-blue); margin-bottom: 20px; }
         .form-group { display: flex; flex-direction: column; }
         label { color: var(--police-accent); font-family: 'Orbitron'; font-size: 0.65rem; margin-bottom: 6px; letter-spacing: 1px; }
@@ -176,7 +179,6 @@
     const ABILITAZIONI_LIST = ["Detective Bureau", "SWAT", "T.E.D.", "K-9", "Marine Unit", "C.R.A.S.H", "Air Unit"];
     const INCARICHI_LIST = ["Istruttore Reclute", "Reclutatore", "Coordinatore", "Resp. Divisione"];
 
-    // REINSERITO CONTROLLO RIGOROSO EMAIL ADMIN
     auth.onAuthStateChanged(user => {
         if (user && user.email === "lspd-altocom@fusion.it") {
             document.getElementById('authSection').classList.add('hidden');
@@ -210,34 +212,42 @@
                 <td class="clickable" onclick="apriDossier('${doc.id}')">${d.nomeAgente}</td>
                 <td>${d.grado}</td>
                 <td><span class="status-badge ${sClass}">${d.stato}</span></td>
-                <td><button onclick="eliminaAgente('${doc.id}')" class="btn-danger" style="padding:5px 10px;">ELIMINA</button></td>
+                <td><button onclick="chiediConfermaEliminazione('${doc.id}', '${d.nomeAgente.replace(/'/g, "\\'")}')" class="btn-danger" style="padding:5px 10px;">ELIMINA</button></td>
             `;
             tbody.appendChild(row);
         });
     }
 
-    document.getElementById('matricolaForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const nuovo = {
-            nomeAgente: document.getElementById('nomeAgente').value,
-            numMatricola: document.getElementById('numMatricola').value,
-            grado: document.getElementById('gradoAgente').value,
-            dataAssunzione: document.getElementById('dataAssunzione').value,
-            responsabile: document.getElementById('responsabile').value,
-            armi: "",
-            note: "",
-            stato: 'IN SERVIZIO',
-            richiami: 0,
-            abilitazioni: [],
-            incarichi: []
-        };
+    // --- NUOVA FUNZIONE DI ELIMINAZIONE STILIZZATA ---
+    function chiediConfermaEliminazione(id, nome) {
+        const modal = document.getElementById('modalOverlay');
+        const body = document.getElementById('modalBody');
+        
+        body.className = "modal-content confirm-box";
+        body.innerHTML = `
+            <h2 style="font-family:'Orbitron'; color:var(--danger); margin-bottom:10px;">[!] ATTENZIONE CRITICA</h2>
+            <p style="font-size:1.1rem; letter-spacing:1px; margin-bottom:25px;">
+                CONFERMARE L'ELIMINAZIONE DEFINITIVA DEL DOSSIER:<br>
+                <span style="color:var(--police-accent); font-weight:bold;">${nome.toUpperCase()}</span>
+            </p>
+            <div style="display:flex; gap:15px; justify-content:center;">
+                <button onclick="eseguiEliminazione('${id}')" class="btn-danger" style="flex:1;">ELIMINA ORA</button>
+                <button onclick="chiudiModale()" style="flex:1; background:#333;">ANNULLA</button>
+            </div>
+        `;
+        modal.style.display = 'flex';
+    }
+
+    async function eseguiEliminazione(id) {
         try {
-            await db.collection("ruolino_agenti").add(nuovo);
-            showNotice("Dossier creato con successo", "success");
-            document.getElementById('matricolaForm').reset();
+            await db.collection("ruolino_agenti").doc(id).delete();
+            showNotice("Record Eliminato Definitivamente", "error");
+            chiudiModale();
             caricaRuolino();
-        } catch (err) { showNotice("Errore Database", "error"); }
-    });
+        } catch (err) {
+            showNotice("Errore durante l'eliminazione", "error");
+        }
+    }
 
     async function apriDossier(id) {
         const doc = await db.collection("ruolino_agenti").doc(id).get();
@@ -245,6 +255,7 @@
         const modal = document.getElementById('modalOverlay');
         const body = document.getElementById('modalBody');
 
+        body.className = "modal-content"; // Reset classe
         body.innerHTML = `
             <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid var(--police-blue); padding-bottom:10px; margin-bottom:20px;">
                 <h2 style="font-family:'Orbitron'; color:var(--police-accent); margin:0;">FILE: ${d.nomeAgente} (#${d.numMatricola})</h2>
@@ -327,14 +338,6 @@
             chiudiModale();
             caricaRuolino();
         } catch (err) { showNotice("Errore Aggiornamento", "error"); }
-    }
-
-    async function eliminaAgente(id) {
-        if(confirm("ATTENZIONE: Stai per eliminare definitivamente questo dossier dal database. Procedere?")) {
-            await db.collection("ruolino_agenti").doc(id).delete();
-            showNotice("Record Eliminato Definitivamente", "error");
-            caricaRuolino();
-        }
     }
 
     function chiudiModale() { document.getElementById('modalOverlay').style.display = 'none'; }
