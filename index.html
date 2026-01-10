@@ -5,167 +5,135 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LSPD - Database Operativo</title>
     
+    <link rel="icon" type="image/png" href="./favicon.png">
+    
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Barlow+Condensed:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --police-blue: #0055ff;
-            --police-dark: #001133;
-            --police-accent: #ffd700;
-            --terminal-bg: #05070a;
-            --border-blue: #0055ff;
-            --neon-glow: rgba(0, 85, 255, 0.4);
-            --danger: #ff4444;
-            --success: #00ff88;
+            --police-blue: #0055ff; --police-dark: #001133; --police-accent: #ffd700;
+            --terminal-bg: #05070a; --border-blue: #0055ff; --neon-glow: rgba(0, 85, 255, 0.4);
+            --danger: #ff4444; --success: #00ff88; --warning: #ffaa00;
         }
 
         body {
             background-color: var(--terminal-bg);
-            background: linear-gradient(rgba(5, 7, 10, 0.92), rgba(5, 7, 10, 0.92)), url('./banner.png') no-repeat center center fixed;
-            background-size: cover;
-            color: #ffffff;
-            font-family: 'Barlow Condensed', sans-serif;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
+            background: linear-gradient(rgba(5, 7, 10, 0.95), rgba(5, 7, 10, 0.95)), url('./banner.png') no-repeat center center fixed;
+            background-size: cover; color: #ffffff; font-family: 'Barlow Condensed', sans-serif;
+            margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh;
         }
 
-        /* --- NOTIFICHE E MODALI --- */
-        #notification-container { position: fixed; top: 20px; right: 20px; z-index: 10000; display: flex; flex-direction: column; gap: 10px; }
-        .notice { background: rgba(13, 17, 23, 0.95); border-left: 4px solid var(--police-blue); color: white; padding: 15px 25px; font-family: 'Orbitron'; font-size: 0.8rem; min-width: 250px; box-shadow: 0 0 15px rgba(0,0,0,0.5); backdrop-filter: blur(5px); animation: slideIn 0.3s ease forwards; }
+        .container { width: 95%; max-width: 1200px; background: rgba(13, 17, 23, 0.95); border: 1px solid var(--border-blue); padding: 25px; margin: 20px 0; backdrop-filter: blur(10px); box-shadow: 0 0 20px var(--neon-glow); position: relative; }
+        .hidden { display: none !important; }
         
-        #modalOverlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
-        .modal-content { background: #0d1117; border: 1px solid var(--police-blue); width: 95%; max-width: 650px; padding: 30px; box-shadow: 0 0 40px var(--neon-glow); max-height: 90vh; overflow-y: auto; position: relative; }
+        #modalOverlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 9999; justify-content: center; align-items: center; backdrop-filter: blur(10px); }
+        .modal-content { background: #0d1117; border: 1px solid var(--police-blue); width: 95%; max-width: 850px; padding: 30px; max-height: 90vh; overflow-y: auto; box-shadow: 0 0 50px rgba(0,85,255,0.3); }
 
-        /* --- LAYOUT --- */
-        .police-logo { width: 120px; margin-top: 20px; filter: drop-shadow(0 0 10px var(--neon-glow)); }
-        .container { width: 95%; max-width: 1100px; background: rgba(13, 17, 23, 0.95); border: 1px solid var(--border-blue); padding: 30px; margin: 20px 0 20px 0; backdrop-filter: blur(10px); box-shadow: 0 0 20px var(--neon-glow); position: relative; }
-        .auth-container { max-width: 400px; margin-top: 50px; text-align: center; }
-        .classified-tag { position: absolute; top: 15px; right: 15px; border: 1px solid var(--police-accent); color: var(--police-accent); padding: 2px 10px; font-family: 'Orbitron'; font-size: 0.6rem; text-transform: uppercase; }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; background: rgba(255,255,255,0.03); padding: 20px; border: 1px dashed var(--police-blue); margin-bottom: 20px; }
+        .form-group { display: flex; flex-direction: column; }
+        label { color: var(--police-accent); font-family: 'Orbitron'; font-size: 0.65rem; margin-bottom: 6px; letter-spacing: 1px; }
+        input, select, textarea { background: #000; border: 1px solid var(--police-blue); color: #fff; padding: 10px; font-family: 'Barlow Condensed'; font-size: 1rem; transition: 0.3s; }
+        input:focus { outline: none; border-color: var(--police-accent); box-shadow: 0 0 10px rgba(255,215,0,0.2); }
 
-        h1, h2 { font-family: 'Orbitron'; text-align: center; letter-spacing: 2px; border-bottom: 2px solid var(--police-blue); padding-bottom: 10px; }
+        .checkbox-group { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; margin-top: 10px; background: rgba(0,0,0,0.3); padding: 10px; border: 1px solid rgba(0,85,255,0.2); }
+        .checkbox-item { display: flex; align-items: center; font-size: 0.85rem; gap: 8px; cursor: pointer; }
+        .checkbox-item input { width: 16px; height: 16px; cursor: pointer; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th { font-family: 'Orbitron'; font-size: 0.75rem; color: var(--police-accent); border-bottom: 2px solid var(--police-blue); padding: 12px; text-align: left; }
+        td { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .clickable { color: var(--police-blue); cursor: pointer; font-weight: bold; text-transform: uppercase; }
+        .clickable:hover { color: var(--police-accent); text-decoration: underline; }
+
+        .status-badge { padding: 4px 10px; border-radius: 3px; font-family: 'Orbitron'; font-size: 0.6rem; font-weight: bold; }
+        .status-servizio { background: rgba(0, 255, 136, 0.1); color: var(--success); border: 1px solid var(--success); }
+        .status-sospeso { background: rgba(255, 170, 0, 0.1); color: var(--warning); border: 1px solid var(--warning); }
+        .status-licenziato { background: rgba(255, 68, 68, 0.1); color: var(--danger); border: 1px solid var(--danger); }
         
-        .action-bar { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
-        .search-bar { flex-grow: 1; background: rgba(255,255,255,0.05); border: 1px solid var(--police-blue); padding: 12px; color: white; font-family: 'Orbitron'; font-size: 0.8rem; }
-
-        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 20px; background: rgba(255,255,255,0.03); padding: 20px; border: 1px dashed rgba(0,85,255,0.3); }
-        .form-group { display: flex; flex-direction: column; text-align: left; }
-        label { color: var(--police-accent); font-size: 0.7rem; font-family: 'Orbitron'; margin-bottom: 5px; }
-        input, select, textarea { background: #000; border: 1px solid var(--police-blue); color: #fff; padding: 10px; font-family: 'Barlow Condensed'; font-size: 1rem; }
-        
-        button { background: var(--police-dark); color: white; border: 1px solid var(--police-blue); padding: 12px 20px; font-family: 'Orbitron'; cursor: pointer; transition: 0.3s; text-transform: uppercase; font-size: 0.7rem; }
+        button { background: var(--police-dark); color: white; border: 1px solid var(--police-blue); padding: 10px 20px; font-family: 'Orbitron'; cursor: pointer; font-size: 0.7rem; transition: 0.3s; letter-spacing: 1px; }
         button:hover { background: var(--police-blue); box-shadow: 0 0 15px var(--police-blue); }
         .btn-danger { border-color: var(--danger); color: var(--danger); }
         .btn-danger:hover { background: var(--danger); color: white; }
 
-        /* --- TABLE --- */
-        table { width: 100%; border-collapse: collapse; }
-        th { font-family: 'Orbitron'; font-size: 0.7rem; color: var(--police-accent); border-bottom: 2px solid var(--police-blue); padding: 12px; text-align: left; }
-        td { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .clickable-name { color: var(--police-blue); cursor: pointer; font-weight: bold; text-decoration: underline; }
-
-        .status-badge { padding: 2px 8px; border-radius: 3px; font-family: 'Orbitron'; font-size: 0.6rem; }
-        .status-servizio { background: rgba(0, 255, 136, 0.2); color: var(--success); border: 1px solid var(--success); }
-        .status-licenziato { background: rgba(255, 68, 68, 0.2); color: var(--danger); border: 1px solid var(--danger); }
-
-        /* --- DOSSIER SPECIFIC --- */
-        .dossier-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; text-align: left; margin-top: 20px; }
-        .dossier-section { border: 1px solid rgba(0,85,255,0.2); padding: 15px; background: rgba(255,255,255,0.02); }
-        .tag-container { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 5px; }
-        .tag { font-size: 0.6rem; padding: 2px 6px; background: var(--police-blue); border-radius: 3px; font-family: 'Orbitron'; }
-
-        .main-footer { margin-top: auto; padding: 20px; text-align: center; width: 100%; background: rgba(0,0,0,0.5); border-top: 1px solid var(--police-blue); }
-        .hidden { display: none !important; }
-
-        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        .main-footer { margin-top: auto; padding: 20px; text-align: center; width: 100%; border-top: 1px solid var(--police-blue); background: rgba(0,0,0,0.8); }
+        
+        #notification-container { position: fixed; top: 20px; right: 20px; z-index: 10001; }
+        .notice { background: #0d1117; border-left: 4px solid var(--police-blue); padding: 15px; margin-bottom: 10px; font-family: 'Orbitron'; font-size: 0.8rem; box-shadow: 0 5px 15px rgba(0,0,0,0.5); animation: slideIn 0.3s ease; }
+        @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
     </style>
 </head>
 <body>
 
 <div id="notification-container"></div>
+<div id="modalOverlay"><div class="modal-content" id="modalBody"></div></div>
 
-<div id="modalOverlay">
-    <div class="modal-content" id="modalBody"></div>
-</div>
+<img src="./logo.png" alt="LSPD Logo" style="width:120px; margin-top:30px; filter: drop-shadow(0 0 10px var(--neon-glow));">
 
-<img src="./logo.png" alt="LSPD Logo" class="police-logo">
-
-<div id="authSection" class="auth-container container">
-    <div class="classified-tag">ACCESSO RISERVATO</div>
-    <h1>LOGIN DATABASE</h1>
+<div id="authSection" class="container" style="max-width:400px; text-align:center; margin-top:50px;">
+    <h2 style="font-family:'Orbitron'; font-size:1.1rem; color:var(--police-accent);">SISTEMA CRIPTATO LSPD</h2>
     <form id="loginForm">
-        <div class="form-group" style="margin-bottom: 15px;">
-            <label>Email Operativa</label>
-            <input type="email" id="loginEmail" required placeholder="agente@lspd.it">
+        <div class="form-group" style="margin-bottom:15px;">
+            <label>Identificativo Email</label>
+            <input type="email" id="loginEmail" required value="lspd-altocom@fusion.it">
         </div>
-        <div class="form-group" style="margin-bottom: 20px;">
-            <label>Codice Criptato</label>
+        <div class="form-group" style="margin-bottom:25px;">
+            <label>Chiave di Accesso</label>
             <input type="password" id="loginPassword" required placeholder="••••••••">
         </div>
-        <button type="submit" style="width: 100%;">AUTORIZZA ACCESSO</button>
+        <button type="submit" style="width:100%;">ESEGUI LOGIN</button>
     </form>
 </div>
 
 <div id="mainApp" class="container hidden">
-    <button id="logoutBtn" onclick="logout()" style="position: absolute; top: 10px; left: 10px;">LOGOUT</button>
-    <div class="classified-tag">Protocollo Fusion</div>
-    <h1>RUOLINO AGENTI LSPD</h1>
+    <div style="display:flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--police-blue); padding-bottom: 15px; margin-bottom: 20px;">
+        <h1 style="font-family:'Orbitron'; font-size:1.4rem; margin:0;">REGISTRO NAZIONALE AGENTI</h1>
+        <button onclick="logout()" class="btn-danger">LOGOUT SESSIONE</button>
+    </div>
 
-    <div id="adminControls">
-        <h3 style="font-family: 'Orbitron'; color: var(--police-accent); font-size: 0.8rem;">[+] INSERIMENTO NUOVO DOSSIER</h3>
-        <form id="matricolaForm" class="form-grid">
+    <form id="matricolaForm">
+        <h3 style="font-family:'Orbitron'; font-size:0.8rem; color:var(--police-accent);">[+] REGISTRAZIONE NUOVO PROFILO OPERATIVO</h3>
+        <div class="form-grid">
+            <div class="form-group"><label>Nome e Cognome Agente</label><input type="text" id="nomeAgente" required></div>
+            <div class="form-group"><label>Matricola</label><input type="text" id="numMatricola" placeholder="es. 44" required></div>
             <div class="form-group">
-                <label>Nome e Cognome</label>
-                <input type="text" id="nomeAgente" required>
-            </div>
-            <div class="form-group">
-                <label>Matricola</label>
-                <input type="text" id="numMatricola" required>
-            </div>
-            <div class="form-group">
-                <label>Grado</label>
+                <label>Grado Attuale</label>
                 <select id="gradoAgente">
-                    <option value="Capo Polizia">Capo Polizia</option>
-                    <option value="Comandante">Comandante</option>
-                    <option value="Capitano">Capitano</option>
-                    <option value="Tenente">Tenente</option>
-                    <option value="Sergente">Sergente</option>
-                    <option value="Detective">Detective</option>
-                    <option value="Agente III">Agente III</option>
-                    <option value="Agente II">Agente II</option>
-                    <option value="Agente I">Agente I</option>
                     <option value="Recluta">Recluta</option>
+                    <option value="Agente I">Agente I</option>
+                    <option value="Agente II">Agente II</option>
+                    <option value="Agente III">Agente III</option>
+                    <option value="Detective I">Detective I</option>
+                    <option value="Detective II">Detective II</option>
+                    <option value="Sergente I">Sergente I</option>
+                    <option value="Sergente II">Sergente II</option>
+                    <option value="Tenente">Tenente</option>
+                    <option value="Capitano">Capitano</option>
+                    <option value="Comandante">Comandante</option>
+                    <option value="Capo Polizia">Capo Polizia</option>
                 </select>
             </div>
-            <div class="form-group">
-                <label>Data Assunzione</label>
-                <input type="date" id="dataAssunzione" required>
-            </div>
-            <div class="form-group" style="grid-column: span 2;">
-                <label>Note Disciplinari / Armi Registrate</label>
-                <textarea id="noteAgente" rows="2" placeholder="Es: Glock-17 Mat. 9982 | Comportamento esemplare..."></textarea>
-            </div>
-            <div class="form-group" style="justify-content: flex-end; grid-column: -1;">
-                <button type="submit" id="btnSalva">ARCHIVIA</button>
-            </div>
-        </form>
-    </div>
+            <div class="form-group"><label>Data Assunzione</label><input type="date" id="dataAssunzione" required></div>
+            <div class="form-group"><label>Ufficiale Reclutatore</label><input type="text" id="responsabile" required></div>
+        </div>
 
-    <div class="action-bar">
-        <input type="text" class="search-bar" id="searchInput" placeholder="CERCA AGENTE O MATRICOLA..." onkeyup="filtraTabella()">
-        <button onclick="esportaReport()">Report TXT</button>
-    </div>
+        <div class="form-grid" style="grid-template-columns: 1fr 1fr;">
+            <div class="form-group"><label>Armamento in Dotazione (Tipo e Matricola)</label><textarea id="armiAgente" rows="3" placeholder="Es: Combat Pistol #LSPD-9921"></textarea></div>
+            <div class="form-group"><label>Note Disciplinari Iniziali</label><textarea id="noteAgente" rows="3" placeholder="Note sul comportamento o precedenti..."></textarea></div>
+        </div>
 
-    <div style="overflow-x: auto;">
+        <button type="submit" style="width:100%; border-color:var(--success); color:var(--success); font-weight:bold;">ARCHIVIA NUOVO DOSSIER</button>
+    </form>
+
+    <div style="margin-top:40px;">
+        <input type="text" id="searchInput" placeholder="FILTRA DATABASE PER NOME, MATRICOLA O GRADO..." onkeyup="filtraTabella()" style="width:100%; box-sizing:border-box; padding:15px; margin-bottom:10px; background:rgba(255,255,255,0.05);">
+        
         <table>
             <thead>
                 <tr>
-                    <th>MAT.</th>
-                    <th>AGENTE</th>
+                    <th>MATRICOLA</th>
+                    <th>NOME AGENTE</th>
                     <th>GRADO</th>
-                    <th>STATO</th>
-                    <th>AZIONI</th>
+                    <th>STATO SERVIZIO</th>
+                    <th>GESTIONE</th>
                 </tr>
             </thead>
             <tbody id="ruolinoCorpo"></tbody>
@@ -174,8 +142,8 @@
 </div>
 
 <footer class="main-footer">
-    <div class="footer-text" style="color: rgba(255,255,255,0.7); font-family: 'Orbitron'; font-size: 0.7rem;">
-        © 2026 <span style="color: var(--police-accent);">LOS SANTOS POLICE DEPARTMENT</span> — PROTOCOLLO FUSION ETERNAL
+    <div style="color: rgba(255,255,255,0.6); font-family: 'Orbitron'; font-size: 0.7rem; letter-spacing: 1px;">
+        © 2026 <span style="color: var(--police-accent);">LOS SANTOS POLICE DEPARTMENT</span> — PORTALE OPERATIVO CRIPTATO
     </div>
 </footer>
 
@@ -192,10 +160,12 @@
         messagingSenderId: "991237515788",
         appId: "1:991237515788:web:302c1b6819947116199c29"
     };
-
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
+
+    const ABILITAZIONI_LIST = ["Detective Bureau", "SWAT", "T.E.D.", "K-9", "Marine Unit", "C.R.A.S.H", "Air Unit"];
+    const INCARICHI_LIST = ["Istruttore Reclute", "Reclutatore", "Coordinatore", "Resp. Divisione"];
 
     auth.onAuthStateChanged(user => {
         if (user && user.email === "lspd-altocom@fusion.it") {
@@ -211,74 +181,29 @@
     document.getElementById('loginForm').addEventListener('submit', e => {
         e.preventDefault();
         auth.signInWithEmailAndPassword(document.getElementById('loginEmail').value, document.getElementById('loginPassword').value)
-            .catch(() => showNotice("ERRORE: Credenziali non autorizzate", "error"));
+            .then(() => showNotice("Accesso Autorizzato", "success"))
+            .catch(err => showNotice("Credenziali Errate", "error"));
     });
 
     function logout() { auth.signOut().then(() => window.location.reload()); }
 
     async function caricaRuolino() {
-        const snapshot = await db.collection("ruolino_agenti").orderBy("numMatricola", "asc").get();
+        const snap = await db.collection("ruolino_agenti").orderBy("numMatricola", "asc").get();
         const tbody = document.getElementById('ruolinoCorpo');
         tbody.innerHTML = "";
-        snapshot.forEach(doc => {
-            const data = doc.data();
+        snap.forEach(doc => {
+            const d = doc.data();
             const row = document.createElement('tr');
+            let sClass = d.stato === 'IN SERVIZIO' ? 'status-servizio' : (d.stato === 'SOSPESO' ? 'status-sospeso' : 'status-licenziato');
             row.innerHTML = `
-                <td style="color:var(--police-accent);">#${data.numMatricola}</td>
-                <td class="clickable-name" onclick="apriDossier('${doc.id}')">${data.nomeAgente}</td>
-                <td>${data.grado}</td>
-                <td><span class="status-badge ${data.stato === 'IN SERVIZIO' ? 'status-servizio' : 'status-licenziato'}">${data.stato}</span></td>
-                <td>
-                    <button onclick="toggleStato('${doc.id}', '${data.stato}')" style="padding:5px;">⚡</button>
-                    <button onclick="eliminaAgente('${doc.id}')" class="btn-danger" style="padding:5px;">X</button>
-                </td>
+                <td style="color:var(--police-accent); font-weight:bold;">#${d.numMatricola}</td>
+                <td class="clickable" onclick="apriDossier('${doc.id}')">${d.nomeAgente}</td>
+                <td>${d.grado}</td>
+                <td><span class="status-badge ${sClass}">${d.stato}</span></td>
+                <td><button onclick="eliminaAgente('${doc.id}')" class="btn-danger" style="padding:5px 10px;">ELIMINA</button></td>
             `;
             tbody.appendChild(row);
         });
-    }
-
-    async function apriDossier(id) {
-        const doc = await db.collection("ruolino_agenti").doc(id).get();
-        const data = doc.data();
-        const modal = document.getElementById('modalOverlay');
-        const body = document.getElementById('modalBody');
-
-        body.innerHTML = `
-            <button onclick="chiudiModale()" style="position:absolute; right:10px; top:10px;">CHIUDI</button>
-            <h2 style="color:var(--police-accent);">DOSSIER AGENTE: ${data.nomeAgente}</h2>
-            <div class="dossier-grid">
-                <div class="dossier-section">
-                    <label>STATO DI SERVIZIO</label>
-                    <p>${data.stato}</p>
-                    <label>RICHIAMI DISCIPLINARI (1-3)</label>
-                    <p style="color:var(--danger); font-weight:bold;">${data.richiami || '0'} / 3</p>
-                </div>
-                <div class="dossier-section">
-                    <label>DATA ASSUNZIONE</label>
-                    <p>${data.dataAssunzione}</p>
-                    <label>RESPONSABILE</label>
-                    <p>${data.responsabile || 'N/D'}</p>
-                </div>
-                <div class="dossier-section" style="grid-column: span 2;">
-                    <label>NOTE E ARMI REGISTRATE</label>
-                    <p style="font-size:0.9rem; white-space: pre-wrap;">${data.noteAgente || 'Nessuna nota presente.'}</p>
-                </div>
-            </div>
-            <div style="margin-top:20px; text-align:left;">
-                <label>MODIFICA RICHIAMI:</label>
-                <input type="number" id="editRichiami" value="${data.richiami || 0}" min="0" max="3" style="width:50px;">
-                <button onclick="aggiornaRichiami('${id}')">SALVA</button>
-            </div>
-        `;
-        modal.style.display = 'flex';
-    }
-
-    async function aggiornaRichiami(id) {
-        const val = document.getElementById('editRichiami').value;
-        await db.collection("ruolino_agenti").doc(id).update({ richiami: val });
-        showNotice("Dossier Aggiornato", "success");
-        chiudiModale();
-        caricaRuolino();
     }
 
     document.getElementById('matricolaForm').addEventListener('submit', async (e) => {
@@ -288,43 +213,137 @@
             numMatricola: document.getElementById('numMatricola').value,
             grado: document.getElementById('gradoAgente').value,
             dataAssunzione: document.getElementById('dataAssunzione').value,
-            noteAgente: document.getElementById('noteAgente').value,
+            responsabile: document.getElementById('responsabile').value,
+            armi: document.getElementById('armiAgente').value,
+            note: document.getElementById('noteAgente').value,
             stato: 'IN SERVIZIO',
-            richiami: 0
+            richiami: 0,
+            abilitazioni: [],
+            incarichi: []
         };
-        await db.collection("ruolino_agenti").add(nuovo);
-        document.getElementById('matricolaForm').reset();
-        caricaRuolino();
-        showNotice("Agente Archiviato", "success");
+        try {
+            await db.collection("ruolino_agenti").add(nuovo);
+            showNotice("Dossier creato con successo", "success");
+            document.getElementById('matricolaForm').reset();
+            caricaRuolino();
+        } catch (err) { showNotice("Errore Database", "error"); }
     });
 
-    async function toggleStato(id, stato) {
-        const nuovo = stato === 'IN SERVIZIO' ? 'LICENZIATO' : 'IN SERVIZIO';
-        await db.collection("ruolino_agenti").doc(id).update({ stato: nuovo });
-        caricaRuolino();
+    async function apriDossier(id) {
+        const doc = await db.collection("ruolino_agenti").doc(id).get();
+        const d = doc.data();
+        const modal = document.getElementById('modalOverlay');
+        const body = document.getElementById('modalBody');
+
+        body.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid var(--police-blue); padding-bottom:10px; margin-bottom:20px;">
+                <h2 style="font-family:'Orbitron'; color:var(--police-accent); margin:0;">FILE: ${d.nomeAgente} (#${d.numMatricola})</h2>
+                <button onclick="chiudiModale()" style="background:#333; border:none;">X CHIUDI</button>
+            </div>
+            
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:25px; text-align:left;">
+                <div>
+                    <label>STATO OPERATIVO</label>
+                    <select id="editStato" style="width:100%;">
+                        <option value="IN SERVIZIO" ${d.stato === 'IN SERVIZIO' ? 'selected' : ''}>IN SERVIZIO</option>
+                        <option value="SOSPESO" ${d.stato === 'SOSPESO' ? 'selected' : ''}>SOSPESO</option>
+                        <option value="LICENZIATO" ${d.stato === 'LICENZIATO' ? 'selected' : ''}>LICENZIATO</option>
+                    </select>
+                    
+                    <label style="margin-top:15px; display:block;">RICHIAMI DISCIPLINARI (MAX 3)</label>
+                    <input type="number" id="editRichiami" value="${d.richiami}" min="0" max="3" style="width:100%;">
+                    
+                    <label style="margin-top:15px; display:block;">DATA ASSUNZIONE</label>
+                    <p style="margin:5px 0; font-size:1.1rem; color:#fff;">${d.dataAssunzione}</p>
+                    
+                    <label style="margin-top:10px; display:block;">RECLUTATORE</label>
+                    <p style="margin:5px 0; font-size:1.1rem; color:var(--police-blue);">${d.responsabile}</p>
+                </div>
+                
+                <div>
+                    <label>ARMI REGISTRATE NEL SISTEMA</label>
+                    <textarea id="editArmi" style="width:100%; height:140px; border-color:var(--warning);">${d.armi || ''}</textarea>
+                </div>
+            </div>
+
+            <div style="margin-top:25px; text-align:left;">
+                <label>ABILITAZIONI DIVISIONALI</label>
+                <div class="checkbox-group">
+                    ${ABILITAZIONI_LIST.map(a => `
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="abs" value="${a}" ${(d.abilitazioni || []).includes(a) ? 'checked' : ''}> ${a}
+                        </label>
+                    `).join('')}
+                </div>
+            </div>
+
+            <div style="margin-top:20px; text-align:left;">
+                <label>INCARICHI E MANSIONI</label>
+                <div class="checkbox-group">
+                    ${INCARICHI_LIST.map(i => `
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="inc" value="${i}" ${(d.incarichi || []).includes(i) ? 'checked' : ''}> ${i}
+                        </label>
+                    `).join('')}
+                </div>
+            </div>
+
+            <div style="margin-top:25px; text-align:left;">
+                <label>STORICO NOTE DISCIPLINARI</label>
+                <textarea id="editNote" style="width:100%; height:120px;">${d.note || ''}</textarea>
+            </div>
+
+            <div style="margin-top:30px;">
+                <button onclick="salvaDossier('${id}')" style="width:100%; padding:15px; background:var(--police-blue); font-weight:bold;">AGGIORNA DATABASE CENTRALE</button>
+            </div>
+        `;
+        modal.style.display = 'flex';
+    }
+
+    async function salvaDossier(id) {
+        const abs = Array.from(document.querySelectorAll('input[name="abs"]:checked')).map(c => c.value);
+        const inc = Array.from(document.querySelectorAll('input[name="inc"]:checked')).map(c => c.value);
+        
+        try {
+            await db.collection("ruolino_agenti").doc(id).update({
+                stato: document.getElementById('editStato').value,
+                richiami: parseInt(document.getElementById('editRichiami').value),
+                armi: document.getElementById('editArmi').value,
+                note: document.getElementById('editNote').value,
+                abilitazioni: abs,
+                incarichi: inc
+            });
+            showNotice("Dossier Aggiornato", "success");
+            chiudiModale();
+            caricaRuolino();
+        } catch (err) { showNotice("Errore Aggiornamento", "error"); }
     }
 
     async function eliminaAgente(id) {
-        if(confirm("Eliminare definitivamente il dossier?")) {
+        if(confirm("ATTENZIONE: Stai per eliminare definitivamente questo dossier dal database. Procedere?")) {
             await db.collection("ruolino_agenti").doc(id).delete();
+            showNotice("Record eliminato", "error");
             caricaRuolino();
         }
     }
 
     function chiudiModale() { document.getElementById('modalOverlay').style.display = 'none'; }
+    
     function filtraTabella() {
-        const val = document.getElementById('searchInput').value.toUpperCase();
-        const rows = document.querySelectorAll('#ruolinoCorpo tr');
-        rows.forEach(r => r.style.display = r.innerText.toUpperCase().includes(val) ? '' : 'none');
+        const v = document.getElementById('searchInput').value.toUpperCase();
+        document.querySelectorAll('#ruolinoCorpo tr').forEach(r => {
+            r.style.display = r.innerText.toUpperCase().includes(v) ? '' : 'none';
+        });
     }
 
     function showNotice(msg, type) {
         const container = document.getElementById('notification-container');
         const n = document.createElement('div');
-        n.className = `notice ${type}`;
+        n.className = `notice`;
+        n.style.borderLeftColor = type === 'success' ? 'var(--success)' : 'var(--danger)';
         n.innerText = msg;
         container.appendChild(n);
-        setTimeout(() => n.remove(), 4000);
+        setTimeout(() => n.remove(), 3500);
     }
 </script>
 </body>
