@@ -322,7 +322,25 @@ async function apriDossier(id) {
     const body = document.getElementById('modalBody');
     
     // Lista dei gradi per generare le opzioni (deve corrispondere a quella del form principale)
-    const gradi = ["Recluta", "Agente I", "Agente II", "Agente III", "Detective I", "Detective II", "Sergente I", "Sergente II", "Tenente", "Capitano", "Comandante", "Capo Polizia"];
+    const gradi = [
+    "Recluta", 
+    "Agente I", 
+    "Agente II", 
+    "Agente III", 
+    "Detective I", 
+    "Sergente I", 
+    "Detective II", 
+    "Sergente II", 
+    "Detective III", 
+    "Tenente I", 
+    "Tenente II", 
+    "Capitano I", 
+    "Capitano II", 
+    "Comandante", 
+    "Vice capo", 
+    "Assistente capo", 
+    "Capo Polizia"
+];
     
     body.className = "modal-content";
     body.innerHTML = `
@@ -438,6 +456,7 @@ async function salvaDossier(id) {
 </script>
 </body>
 </html>
+
 
 
 
