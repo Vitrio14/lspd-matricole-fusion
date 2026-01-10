@@ -310,7 +310,7 @@
         } catch (err) { showNotice("Errore Scrittura", "error"); }
     });
 
-    async function apriDossier(id) {
+async function apriDossier(id) {
         const doc = await db.collection("ruolino_agenti").doc(id).get();
         const d = doc.data();
         const modal = document.getElementById('modalOverlay');
@@ -337,12 +337,21 @@
                     <textarea id="editArmi" style="width:100%; height:100px;">${d.armi || ''}</textarea>
                 </div>
             </div>
+            
             <div style="margin-top:20px; text-align:left;">
-                <label>ABILITAZIONI / INCARICHI</label>
+                <label>ABILITAZIONI OPERATIVE</label>
                 <div class="checkbox-group">
                     ${ABILITAZIONI_LIST.map(a => `<label class="checkbox-item"><input type="checkbox" name="abs" value="${a}" ${(d.abilitazioni || []).includes(a) ? 'checked' : ''}> ${a}</label>`).join('')}
                 </div>
             </div>
+
+            <div style="margin-top:20px; text-align:left;">
+                <label>INCARICHI DIPARTIMENTALI</label>
+                <div class="checkbox-group" style="border-color: var(--police-accent);">
+                    ${INCARICHI_LIST.map(i => `<label class="checkbox-item"><input type="checkbox" name="inc" value="${i}" ${(d.incarichi || []).includes(i) ? 'checked' : ''}> ${i}</label>`).join('')}
+                </div>
+            </div>
+
             <div style="margin-top:20px; text-align:left;">
                 <label>NOTE DISCIPLINARI</label>
                 <textarea id="editNote" style="width:100%; height:80px;">${d.note || ''}</textarea>
@@ -352,15 +361,17 @@
         modal.style.display = 'flex';
     }
 
-    async function salvaDossier(id) {
+async function salvaDossier(id) {
         const abs = Array.from(document.querySelectorAll('input[name="abs"]:checked')).map(c => c.value);
+        const inc = Array.from(document.querySelectorAll('input[name="inc"]:checked')).map(c => c.value);
         try {
             await db.collection("ruolino_agenti").doc(id).update({
                 stato: document.getElementById('editStato').value,
                 richiami: parseInt(document.getElementById('editRichiami').value),
                 armi: document.getElementById('editArmi').value,
                 note: document.getElementById('editNote').value,
-                abilitazioni: abs
+                abilitazioni: abs,
+                incarichi: inc
             });
             showNotice("Dossier Aggiornato", "success");
             chiudiModale();
@@ -408,4 +419,5 @@
 </script>
 </body>
 </html>
+
 
