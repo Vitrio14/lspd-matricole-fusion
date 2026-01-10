@@ -311,73 +311,87 @@
     });
 
 async function apriDossier(id) {
-        const doc = await db.collection("ruolino_agenti").doc(id).get();
-        const d = doc.data();
-        const modal = document.getElementById('modalOverlay');
-        const body = document.getElementById('modalBody');
-        body.className = "modal-content";
-        body.innerHTML = `
-            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid var(--police-blue); padding-bottom:10px; margin-bottom:20px;">
-                <h2 style="font-family:'Orbitron'; color:var(--police-accent); margin:0;">FILE: ${d.nomeAgente} (#${d.numMatricola})</h2>
-                <button onclick="chiudiModale()" style="background:#333; border:none;">X CHIUDI</button>
-            </div>
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:25px; text-align:left;">
-                <div>
-                    <label>STATO OPERATIVO</label>
-                    <select id="editStato" style="width:100%;">
-                        <option value="IN SERVIZIO" ${d.stato === 'IN SERVIZIO' ? 'selected' : ''}>IN SERVIZIO</option>
-                        <option value="SOSPESO" ${d.stato === 'SOSPESO' ? 'selected' : ''}>SOSPESO</option>
-                        <option value="LICENZIATO" ${d.stato === 'LICENZIATO' ? 'selected' : ''}>LICENZIATO</option>
-                    </select>
-                    <label style="margin-top:15px; display:block;">RICHIAMI DISCIPLINARI</label>
-                    <input type="number" id="editRichiami" value="${d.richiami}" min="0" max="3" style="width:100%;">
-                </div>
-                <div>
-                    <label>ARMI REGISTRATE</label>
-                    <textarea id="editArmi" style="width:100%; height:100px;">${d.armi || ''}</textarea>
-                </div>
-            </div>
-            
-            <div style="margin-top:20px; text-align:left;">
-                <label>ABILITAZIONI OPERATIVE</label>
-                <div class="checkbox-group">
-                    ${ABILITAZIONI_LIST.map(a => `<label class="checkbox-item"><input type="checkbox" name="abs" value="${a}" ${(d.abilitazioni || []).includes(a) ? 'checked' : ''}> ${a}</label>`).join('')}
-                </div>
-            </div>
+    const doc = await db.collection("ruolino_agenti").doc(id).get();
+    const d = doc.data();
+    const modal = document.getElementById('modalOverlay');
+    const body = document.getElementById('modalBody');
+    
+    // Lista dei gradi per generare le opzioni (deve corrispondere a quella del form principale)
+    const gradi = ["Recluta", "Agente I", "Agente II", "Agente III", "Detective I", "Detective II", "Sergente I", "Sergente II", "Tenente", "Capitano", "Comandante", "Capo Polizia"];
+    
+    body.className = "modal-content";
+    body.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid var(--police-blue); padding-bottom:10px; margin-bottom:20px;">
+            <h2 style="font-family:'Orbitron'; color:var(--police-accent); margin:0;">FILE: ${d.nomeAgente} (#${d.numMatricola})</h2>
+            <button onclick="chiudiModale()" style="background:#333; border:none;">X CHIUDI</button>
+        </div>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:25px; text-align:left;">
+            <div>
+                <label>GRADO ATTUALE</label>
+                <select id="editGrado" style="width:100%; margin-bottom:15px;">
+                    ${gradi.map(g => `<option value="${g}" ${d.grado === g ? 'selected' : ''}>${g}</option>`).join('')}
+                </select>
 
-            <div style="margin-top:20px; text-align:left;">
-                <label>INCARICHI DIPARTIMENTALI</label>
-                <div class="checkbox-group" style="border-color: var(--police-accent);">
-                    ${INCARICHI_LIST.map(i => `<label class="checkbox-item"><input type="checkbox" name="inc" value="${i}" ${(d.incarichi || []).includes(i) ? 'checked' : ''}> ${i}</label>`).join('')}
-                </div>
+                <label>STATO OPERATIVO</label>
+                <select id="editStato" style="width:100%;">
+                    <option value="IN SERVIZIO" ${d.stato === 'IN SERVIZIO' ? 'selected' : ''}>IN SERVIZIO</option>
+                    <option value="SOSPESO" ${d.stato === 'SOSPESO' ? 'selected' : ''}>SOSPESO</option>
+                    <option value="LICENZIATO" ${d.stato === 'LICENZIATO' ? 'selected' : ''}>LICENZIATO</option>
+                </select>
+                
+                <label style="margin-top:15px; display:block;">RICHIAMI DISCIPLINARI</label>
+                <input type="number" id="editRichiami" value="${d.richiami}" min="0" max="3" style="width:100%;">
             </div>
+            <div>
+                <label>ARMI REGISTRATE</label>
+                <textarea id="editArmi" style="width:100%; height:100px;">${d.armi || ''}</textarea>
+            </div>
+        </div>
+        
+        <div style="margin-top:20px; text-align:left;">
+            <label>ABILITAZIONI OPERATIVE</label>
+            <div class="checkbox-group">
+                ${ABILITAZIONI_LIST.map(a => `<label class="checkbox-item"><input type="checkbox" name="abs" value="${a}" ${(d.abilitazioni || []).includes(a) ? 'checked' : ''}> ${a}</label>`).join('')}
+            </div>
+        </div>
 
-            <div style="margin-top:20px; text-align:left;">
-                <label>NOTE DISCIPLINARI</label>
-                <textarea id="editNote" style="width:100%; height:80px;">${d.note || ''}</textarea>
+        <div style="margin-top:20px; text-align:left;">
+            <label>INCARICHI DIPARTIMENTALI</label>
+            <div class="checkbox-group" style="border-color: var(--police-accent);">
+                ${INCARICHI_LIST.map(i => `<label class="checkbox-item"><input type="checkbox" name="inc" value="${i}" ${(d.incarichi || []).includes(i) ? 'checked' : ''}> ${i}</label>`).join('')}
             </div>
-            <button onclick="salvaDossier('${id}')" style="width:100%; margin-top:20px; padding:15px; background:var(--police-blue);">SALVA MODIFICHE</button>
-        `;
-        modal.style.display = 'flex';
-    }
+        </div>
+
+        <div style="margin-top:20px; text-align:left;">
+            <label>NOTE DISCIPLINARI</label>
+            <textarea id="editNote" style="width:100%; height:80px;">${d.note || ''}</textarea>
+        </div>
+        <button onclick="salvaDossier('${id}')" style="width:100%; margin-top:20px; padding:15px; background:var(--police-blue);">SALVA MODIFICHE</button>
+    `;
+    modal.style.display = 'flex';
+}
 
 async function salvaDossier(id) {
-        const abs = Array.from(document.querySelectorAll('input[name="abs"]:checked')).map(c => c.value);
-        const inc = Array.from(document.querySelectorAll('input[name="inc"]:checked')).map(c => c.value);
-        try {
-            await db.collection("ruolino_agenti").doc(id).update({
-                stato: document.getElementById('editStato').value,
-                richiami: parseInt(document.getElementById('editRichiami').value),
-                armi: document.getElementById('editArmi').value,
-                note: document.getElementById('editNote').value,
-                abilitazioni: abs,
-                incarichi: inc
-            });
-            showNotice("Dossier Aggiornato", "success");
-            chiudiModale();
-            caricaRuolino();
-        } catch (err) { showNotice("Errore Aggiornamento", "error"); }
+    const abs = Array.from(document.querySelectorAll('input[name="abs"]:checked')).map(c => c.value);
+    const inc = Array.from(document.querySelectorAll('input[name="inc"]:checked')).map(c => c.value);
+    
+    try {
+        await db.collection("ruolino_agenti").doc(id).update({
+            grado: document.getElementById('editGrado').value, // <--- Aggiunta questa riga
+            stato: document.getElementById('editStato').value,
+            richiami: parseInt(document.getElementById('editRichiami').value),
+            armi: document.getElementById('editArmi').value,
+            note: document.getElementById('editNote').value,
+            abilitazioni: abs,
+            incarichi: inc
+        });
+        showNotice("Dossier Aggiornato", "success");
+        chiudiModale();
+        caricaRuolino();
+    } catch (err) { 
+        showNotice("Errore Aggiornamento", "error"); 
     }
+}
 
     function chiediConfermaEliminazione(id, nome) {
         const modal = document.getElementById('modalOverlay');
@@ -419,6 +433,7 @@ async function salvaDossier(id) {
 </script>
 </body>
 </html>
+
 
 
 
