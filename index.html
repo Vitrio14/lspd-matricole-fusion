@@ -28,8 +28,16 @@
         #modalOverlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 9999; justify-content: center; align-items: center; backdrop-filter: blur(10px); }
         .modal-content { background: #0d1117; border: 1px solid var(--police-blue); width: 95%; max-width: 850px; padding: 30px; max-height: 90vh; overflow-y: auto; box-shadow: 0 0 50px rgba(0,85,255,0.3); }
 
-        /* Stile specifico per conferma eliminazione */
         .confirm-box { text-align: center; border: 2px solid var(--danger) !important; max-width: 400px !important; }
+
+        /* Stile Dashboard Contatori */
+        .stats-dashboard { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 25px; }
+        .stat-card { background: rgba(0, 85, 255, 0.05); border: 1px solid rgba(0, 85, 255, 0.3); padding: 15px; text-align: center; border-left: 4px solid var(--police-blue); }
+        .stat-card.active { border-left-color: var(--success); }
+        .stat-card.suspended { border-left-color: var(--warning); }
+        .stat-card.fired { border-left-color: var(--danger); }
+        .stat-value { font-family: 'Orbitron'; font-size: 1.5rem; display: block; font-weight: bold; }
+        .stat-label { font-size: 0.7rem; color: var(--police-accent); text-transform: uppercase; letter-spacing: 1px; }
 
         .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; background: rgba(255,255,255,0.03); padding: 20px; border: 1px dashed var(--police-blue); margin-bottom: 20px; }
         .form-group { display: flex; flex-direction: column; }
@@ -102,8 +110,27 @@
 
 <div id="mainApp" class="container hidden">
     <div style="display:flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--police-blue); padding-bottom: 15px; margin-bottom: 20px;">
-        <h1 style="font-family:'Orbitron'; font-size:1.4rem; margin:0;">REGISTRO NAZIONALE AGENTI</h1>
+        <h1 style="font-family:'Orbitron'; font-size:1.4rem; margin:0;">REGISTRO MATRICOLE AGENTI</h1>
         <button onclick="logout()" class="btn-danger">LOGOUT SESSIONE</button>
+    </div>
+
+    <div class="stats-dashboard">
+        <div class="stat-card">
+            <span class="stat-label">Agenti Totali</span>
+            <span id="count-totale" class="stat-value">0</span>
+        </div>
+        <div class="stat-card active">
+            <span class="stat-label">In Servizio</span>
+            <span id="count-attivi" class="stat-value" style="color:var(--success);">0</span>
+        </div>
+        <div class="stat-card suspended">
+            <span class="stat-label">Sospesi</span>
+            <span id="count-sospesi" class="stat-value" style="color:var(--warning);">0</span>
+        </div>
+        <div class="stat-card fired">
+            <span class="stat-label">Licenziati</span>
+            <span id="count-licenziati" class="stat-value" style="color:var(--danger);">0</span>
+        </div>
     </div>
 
     <form id="matricolaForm">
@@ -131,13 +158,11 @@
             <div class="form-group"><label>Data Assunzione</label><input type="date" id="dataAssunzione" required></div>
             <div class="form-group"><label>Ufficiale Reclutatore</label><input type="text" id="responsabile" required></div>
         </div>
-
         <button type="submit" style="width:100%; border-color:var(--success); color:var(--success); font-weight:bold;">ARCHIVIA NUOVO DOSSIER</button>
     </form>
 
     <div style="margin-top:40px;">
         <input type="text" id="searchInput" placeholder="FILTRA DATABASE PER NOME, MATRICOLA O GRADO..." onkeyup="filtraTabella()" style="width:100%; box-sizing:border-box; padding:15px; margin-bottom:10px; background:rgba(255,255,255,0.05);">
-        
         <table>
             <thead>
                 <tr>
@@ -203,8 +228,16 @@
         const snap = await db.collection("ruolino_agenti").orderBy("numMatricola", "asc").get();
         const tbody = document.getElementById('ruolinoCorpo');
         tbody.innerHTML = "";
+        
+        let stats = { totale: 0, attivi: 0, sospesi: 0, licenziati: 0 };
+
         snap.forEach(doc => {
             const d = doc.data();
+            stats.totale++;
+            if(d.stato === 'IN SERVIZIO') stats.attivi++;
+            else if(d.stato === 'SOSPESO') stats.sospesi++;
+            else if(d.stato === 'LICENZIATO') stats.licenziati++;
+
             const row = document.createElement('tr');
             let sClass = d.stato === 'IN SERVIZIO' ? 'status-servizio' : (d.stato === 'SOSPESO' ? 'status-sospeso' : 'status-licenziato');
             row.innerHTML = `
@@ -216,13 +249,17 @@
             `;
             tbody.appendChild(row);
         });
+
+        // Aggiorna Dashboard
+        document.getElementById('count-totale').innerText = stats.totale;
+        document.getElementById('count-attivi').innerText = stats.attivi;
+        document.getElementById('count-sospesi').innerText = stats.sospesi;
+        document.getElementById('count-licenziati').innerText = stats.licenziati;
     }
 
-    // --- NUOVA FUNZIONE DI ELIMINAZIONE STILIZZATA ---
     function chiediConfermaEliminazione(id, nome) {
         const modal = document.getElementById('modalOverlay');
         const body = document.getElementById('modalBody');
-        
         body.className = "modal-content confirm-box";
         body.innerHTML = `
             <h2 style="font-family:'Orbitron'; color:var(--danger); margin-bottom:10px;">[!] ATTENZIONE CRITICA</h2>
@@ -244,24 +281,38 @@
             showNotice("Record Eliminato Definitivamente", "error");
             chiudiModale();
             caricaRuolino();
-        } catch (err) {
-            showNotice("Errore durante l'eliminazione", "error");
-        }
+        } catch (err) { showNotice("Errore durante l'eliminazione", "error"); }
     }
+
+    document.getElementById('matricolaForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const nuovo = {
+            nomeAgente: document.getElementById('nomeAgente').value,
+            numMatricola: document.getElementById('numMatricola').value,
+            grado: document.getElementById('gradoAgente').value,
+            dataAssunzione: document.getElementById('dataAssunzione').value,
+            responsabile: document.getElementById('responsabile').value,
+            armi: "", note: "", stato: 'IN SERVIZIO', richiami: 0, abilitazioni: [], incarichi: []
+        };
+        try {
+            await db.collection("ruolino_agenti").add(nuovo);
+            showNotice("Dossier creato con successo", "success");
+            document.getElementById('matricolaForm').reset();
+            caricaRuolino();
+        } catch (err) { showNotice("Errore Database", "error"); }
+    });
 
     async function apriDossier(id) {
         const doc = await db.collection("ruolino_agenti").doc(id).get();
         const d = doc.data();
         const modal = document.getElementById('modalOverlay');
         const body = document.getElementById('modalBody');
-
-        body.className = "modal-content"; // Reset classe
+        body.className = "modal-content";
         body.innerHTML = `
             <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid var(--police-blue); padding-bottom:10px; margin-bottom:20px;">
                 <h2 style="font-family:'Orbitron'; color:var(--police-accent); margin:0;">FILE: ${d.nomeAgente} (#${d.numMatricola})</h2>
                 <button onclick="chiudiModale()" style="background:#333; border:none;">X CHIUDI</button>
             </div>
-            
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:25px; text-align:left;">
                 <div>
                     <label>STATO OPERATIVO</label>
@@ -270,50 +321,34 @@
                         <option value="SOSPESO" ${d.stato === 'SOSPESO' ? 'selected' : ''}>SOSPESO</option>
                         <option value="LICENZIATO" ${d.stato === 'LICENZIATO' ? 'selected' : ''}>LICENZIATO</option>
                     </select>
-                    
                     <label style="margin-top:15px; display:block;">RICHIAMI DISCIPLINARI (MAX 3)</label>
                     <input type="number" id="editRichiami" value="${d.richiami}" min="0" max="3" style="width:100%;">
-                    
                     <label style="margin-top:15px; display:block;">DATA ASSUNZIONE</label>
                     <p style="margin:5px 0; font-size:1.1rem; color:#fff;">${d.dataAssunzione}</p>
-                    
                     <label style="margin-top:10px; display:block;">RECLUTATORE</label>
                     <p style="margin:5px 0; font-size:1.1rem; color:var(--police-blue);">${d.responsabile}</p>
                 </div>
-                
                 <div>
                     <label>ARMI REGISTRATE NEL SISTEMA</label>
                     <textarea id="editArmi" style="width:100%; height:140px; border-color:var(--warning);">${d.armi || ''}</textarea>
                 </div>
             </div>
-
             <div style="margin-top:25px; text-align:left;">
                 <label>ABILITAZIONI DIVISIONALI</label>
                 <div class="checkbox-group">
-                    ${ABILITAZIONI_LIST.map(a => `
-                        <label class="checkbox-item">
-                            <input type="checkbox" name="abs" value="${a}" ${(d.abilitazioni || []).includes(a) ? 'checked' : ''}> ${a}
-                        </label>
-                    `).join('')}
+                    ${ABILITAZIONI_LIST.map(a => `<label class="checkbox-item"><input type="checkbox" name="abs" value="${a}" ${(d.abilitazioni || []).includes(a) ? 'checked' : ''}> ${a}</label>`).join('')}
                 </div>
             </div>
-
             <div style="margin-top:20px; text-align:left;">
                 <label>INCARICHI E MANSIONI</label>
                 <div class="checkbox-group">
-                    ${INCARICHI_LIST.map(i => `
-                        <label class="checkbox-item">
-                            <input type="checkbox" name="inc" value="${i}" ${(d.incarichi || []).includes(i) ? 'checked' : ''}> ${i}
-                        </label>
-                    `).join('')}
+                    ${INCARICHI_LIST.map(i => `<label class="checkbox-item"><input type="checkbox" name="inc" value="${i}" ${(d.incarichi || []).includes(i) ? 'checked' : ''}> ${i}</label>`).join('')}
                 </div>
             </div>
-
             <div style="margin-top:25px; text-align:left;">
                 <label>STORICO NOTE DISCIPLINARI</label>
                 <textarea id="editNote" style="width:100%; height:120px;">${d.note || ''}</textarea>
             </div>
-
             <div style="margin-top:30px;">
                 <button onclick="salvaDossier('${id}')" style="width:100%; padding:15px; background:var(--police-blue); font-weight:bold;">AGGIORNA DATABASE CENTRALE</button>
             </div>
@@ -324,15 +359,13 @@
     async function salvaDossier(id) {
         const abs = Array.from(document.querySelectorAll('input[name="abs"]:checked')).map(c => c.value);
         const inc = Array.from(document.querySelectorAll('input[name="inc"]:checked')).map(c => c.value);
-        
         try {
             await db.collection("ruolino_agenti").doc(id).update({
                 stato: document.getElementById('editStato').value,
                 richiami: parseInt(document.getElementById('editRichiami').value),
                 armi: document.getElementById('editArmi').value,
                 note: document.getElementById('editNote').value,
-                abilitazioni: abs,
-                incarichi: inc
+                abilitazioni: abs, incarichi: inc
             });
             showNotice("Dossier Aggiornato", "success");
             chiudiModale();
@@ -353,18 +386,10 @@
         const container = document.getElementById('notification-container');
         const n = document.createElement('div');
         const prefix = type === 'success' ? '[ACCESSO CONSENTITO]' : '[AVVISO DI SISTEMA]';
-        
         n.className = `notice ${type}`;
-        n.innerHTML = `
-            <div style="font-size: 0.6rem; opacity: 0.7; margin-bottom: 4px;">${prefix}</div>
-            <div style="font-weight: bold;">${msg}</div>
-        `;
-        
+        n.innerHTML = `<div style="font-size: 0.6rem; opacity: 0.7; margin-bottom: 4px;">${prefix}</div><div style="font-weight: bold;">${msg}</div>`;
         container.appendChild(n);
-        setTimeout(() => {
-            n.classList.add('notice-exit');
-            setTimeout(() => n.remove(), 300);
-        }, 4000);
+        setTimeout(() => { n.classList.add('notice-exit'); setTimeout(() => n.remove(), 300); }, 4000);
     }
 </script>
 </body>
