@@ -219,7 +219,6 @@
         const mainApp = document.getElementById('mainApp');
 
         if (user) {
-            // Controllo di sicurezza: se l'email non è quella dell'Alto Comando, forzo il logout
             if (user.email.toLowerCase() === TARGET_AUTH_EMAIL.toLowerCase()) {
                 authSection.classList.add('hidden');
                 mainApp.classList.remove('hidden');
@@ -231,7 +230,7 @@
         } else {
             authSection.classList.remove('hidden');
             mainApp.classList.add('hidden');
-            document.getElementById('ruolinoCorpo').innerHTML = ""; // Pulisce i dati sensibili
+            document.getElementById('ruolinoCorpo').innerHTML = ""; 
         }
     });
 
@@ -241,7 +240,6 @@
         const email = document.getElementById('loginEmail').value.trim();
         const pass = document.getElementById('loginPassword').value;
 
-        // Verifica preventiva lato client
         if (email.toLowerCase() !== TARGET_AUTH_EMAIL.toLowerCase()) {
             showNotice("ERRORE: Credenziali non valide per l'Alto Comando", "error");
             return;
@@ -277,9 +275,16 @@
 
                 const row = document.createElement('tr');
                 let sClass = d.stato === 'IN SERVIZIO' ? 'status-servizio' : (d.stato === 'SOSPESO' ? 'status-sospeso' : 'status-licenziato');
+                
+                // Formattazione Reclutatore: mostrato sotto il nome agente
+                const reclutatoreTag = d.responsabile ? `<div style="font-size:0.6rem; color:rgba(255,255,255,0.4); margin-top:4px; font-family:'Orbitron';">RECLUTATO DA: ${d.responsabile.toUpperCase()}</div>` : "";
+
                 row.innerHTML = `
                     <td style="color:var(--police-accent); font-weight:bold;">#${d.numMatricola}</td>
-                    <td class="clickable" onclick="apriDossier('${doc.id}')">${d.nomeAgente}</td>
+                    <td class="clickable" onclick="apriDossier('${doc.id}')">
+                        <div>${d.nomeAgente}</div>
+                        ${reclutatoreTag}
+                    </td>
                     <td>${d.grado}</td>
                     <td><span class="status-badge ${sClass}">${d.stato}</span></td>
                     <td><button onclick="chiediConfermaEliminazione('${doc.id}', '${d.nomeAgente.replace(/'/g, "\\'")}')" class="btn-danger" style="padding:5px 10px;">ELIMINA</button></td>
@@ -321,26 +326,7 @@ async function apriDossier(id) {
     const modal = document.getElementById('modalOverlay');
     const body = document.getElementById('modalBody');
     
-    // Lista dei gradi per generare le opzioni (deve corrispondere a quella del form principale)
-    const gradi = [
-    "Recluta", 
-    "Agente I", 
-    "Agente II", 
-    "Agente III", 
-    "Detective I", 
-    "Sergente I", 
-    "Detective II", 
-    "Sergente II", 
-    "Detective III", 
-    "Tenente I", 
-    "Tenente II", 
-    "Capitano I", 
-    "Capitano II", 
-    "Comandante", 
-    "Vice capo", 
-    "Assistente capo", 
-    "Capo Polizia"
-];
+    const gradi = ["Recluta", "Agente I", "Agente II", "Agente III", "Detective I", "Sergente I", "Detective II", "Sergente II", "Detective III", "Tenente I", "Tenente II", "Capitano I", "Capitano II", "Comandante", "Vice capo", "Assistente capo", "Capo Polizia"];
     
     body.className = "modal-content";
     body.innerHTML = `
@@ -400,7 +386,7 @@ async function salvaDossier(id) {
     
     try {
         await db.collection("ruolino_agenti").doc(id).update({
-            grado: document.getElementById('editGrado').value, // <--- Aggiunta questa riga
+            grado: document.getElementById('editGrado').value,
             stato: document.getElementById('editStato').value,
             richiami: parseInt(document.getElementById('editRichiami').value),
             armi: document.getElementById('editArmi').value,
@@ -456,11 +442,3 @@ async function salvaDossier(id) {
 </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
