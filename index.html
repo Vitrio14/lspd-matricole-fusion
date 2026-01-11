@@ -94,24 +94,24 @@
 <img src="./logo.png" alt="LSPD Logo" style="width:120px; margin-top:30px; filter: drop-shadow(0 0 10px var(--neon-glow));">
 
 <div id="authSection" class="container" style="max-width:400px; text-align:center; margin-top:50px;">
-    <h2 style="font-family:'Orbitron'; font-size:1.1rem; color:var(--police-accent);">SISTEMA CRIPTATO LSPD</h2>
+    <h2 style="font-family:'Orbitron'; font-size:1.1rem; color:var(--police-accent);">SISTEMA MATRICOLE LSPD</h2>
     <form id="loginForm">
         <div class="form-group" style="margin-bottom:15px;">
-            <label>Identificativo Email</label>
-            <input type="email" id="loginEmail" required placeholder="Inserisci la tua email ministeriale">
+            <label>Email</label>
+            <input type="email" id="loginEmail" required placeholder="esempio@email.com">
         </div>
         <div class="form-group" style="margin-bottom:25px;">
-            <label>Chiave di Accesso</label>
+            <label>Password</label>
             <input type="password" id="loginPassword" required placeholder="••••••••">
         </div>
-        <button type="submit" style="width:100%;">ESEGUI LOGIN</button>
+        <button type="submit" style="width:100%;">EFFETTUA IL LOGIN</button>
     </form>
 </div>
 
 <div id="mainApp" class="container hidden">
     <div style="display:flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--police-blue); padding-bottom: 15px; margin-bottom: 20px;">
         <h1 style="font-family:'Orbitron'; font-size:1.4rem; margin:0;">REGISTRO MATRICOLE AGENTI</h1>
-        <button onclick="logout()" class="btn-danger">LOGOUT SESSIONE</button>
+        <button onclick="logout()" class="btn-danger">LOGOUT</button>
     </div>
 
     <div class="stats-dashboard">
@@ -163,7 +163,7 @@
             <div class="form-group"><label>Data Assunzione</label><input type="date" id="dataAssunzione" required></div>
             <div class="form-group"><label>Ufficiale Reclutatore</label><input type="text" id="responsabile" required></div>
         </div>
-        <button type="submit" style="width:100%; border-color:var(--success); color:var(--success); font-weight:bold;">ARCHIVIA NUOVO DOSSIER</button>
+        <button type="submit" style="width:100%; border-color:var(--success); color:var(--success); font-weight:bold;">REGISTRA NUOVA MATRICOLA</button>
     </form>
 
     <div style="margin-top:40px;">
@@ -456,6 +456,7 @@ async function salvaDossier(id) {
 </script>
 </body>
 </html>
+
 
 
 
