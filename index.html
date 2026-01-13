@@ -218,8 +218,8 @@
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    const ABILITAZIONI_LIST = ["Detective Bureau", "SWAT", "T.E.D.", "K-9", "Marine Unit", "C.R.A.S.H", "Air Unit"];
-    const INCARICHI_LIST = ["Istruttore Reclute", "Reclutatore", "Coordinatore", "Resp. Divisione"];
+    const ABILITAZIONI_LIST = ["Detective Bureau", "SWAT", "HSU", "Mary", "K-9", "Marine Unit", "C.R.A.S.H", "Air Unit"];
+    const INCARICHI_LIST = ["Istruttore Reclute", "Reclutatore", "Coordinatore", "Resp. Divisione", "Resp. Stipendi","Resp. Autoparco"];
 
     // --- LOGICA DI AUTORIZZAZIONE ---
     auth.onAuthStateChanged(user => {
@@ -454,4 +454,5 @@ async function salvaDossier(id) {
 </script>
 </body>
 </html>
+
 
